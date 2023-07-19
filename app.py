@@ -15,5 +15,18 @@ def home():
                            text='This is the home page')
 
 
+# used with webhooks to update server
+@app.route("/update_server", methods=['POST'])
+def webhook():
+    if request.method == 'POST':
+        repo = git.Repo('/home/carbonfootprint/')
+        origin = repo.remotes.origin
+        origin.pull()
+        return 'Updated PythonAnywhere successfully', 200
+    else:
+        return 'Wrong event type', 400
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")

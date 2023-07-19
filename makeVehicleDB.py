@@ -3,10 +3,11 @@ import pandas as pd
 import pprint
 import sqlalchemy as db
 from sqlalchemy import select
+import os
 from sqlalchemy.sql import text as sa_text
 
-key = 'Zj2PMQ49dWMGMSKnVYnw'
-header = {'Authorization': 'Bearer Zj2PMQ49dWMGMSKnVYnw'}
+b = os.environ.get('BEARER_KEY')
+header = {'Authorization': 'Bearer ' + b}
 url = 'https://www.carboninterface.com/api/v1/vehicle_makes'
 req = requests.get(url, headers=header)
 #pprint.pprint(req.json())\

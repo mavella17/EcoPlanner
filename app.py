@@ -11,6 +11,7 @@ from flask_behind_proxy import FlaskBehindProxy
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
+engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 
 @app.route("/")
 @app.route("/home")
@@ -46,7 +47,7 @@ def flight_data():
 
 
 def get_options_from_database(selected_value):
-    
+
     with engine.connect() as connection:
         query_result = connection.execute(db.text(query)).fetchall()
     return [item[0] for item in query_result]
@@ -54,8 +55,6 @@ def get_options_from_database(selected_value):
 
 @app.route('/get_models', methods=['POST'])
 def get_options():
-    engine = db.create_engine('sqlite:///vehicles.db')
-    
     selected_value = request.form['selected_value']
     query = "SELECT distinct name FROM vehicles WHERE vehicle_make = '"
     query += str(selected_value) + "';"
@@ -65,7 +64,7 @@ def get_options():
 
 @app.route('/get_years', methods=['POST'])
 def get_years():
-    engine = db.create_engine('sqlite:///vehicles.db')
+
     selected_value = request.form['selected_value']
     query = "SELECT distinct year FROM vehicles WHERE name = '"
     query += str(selected_value) + "';"

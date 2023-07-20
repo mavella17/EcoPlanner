@@ -17,4 +17,4 @@ selected_value = 'Acura'
 query = "SELECT * FROM vehicles where name = 'Integra';"
 with engine.connect() as connection:
     query_result = connection.execute(db.text(query)).fetchall()
-    print("Getting DB: \n --------- \n",pd.DataFrame(query_result))
+    print("Getting DB: \n --------- \n", pd.DataFrame(query_result))

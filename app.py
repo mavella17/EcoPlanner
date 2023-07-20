@@ -13,6 +13,7 @@ proxied = FlaskBehindProxy(app)
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -31,6 +32,7 @@ def webhook():
     else:
         return 'Wrong event type', 400
 
+
 @app.route("/drive", methods=['GET', 'POST'])
 def drive_data():
     form = driveData()
@@ -38,19 +40,13 @@ def drive_data():
         return redirect(url_for('results'))
     return render_template('drive.html', title='Drive Data', form=form)
 
+
 @app.route('/flights', methods=['GET', 'POST'])
 def flight_data():
     form = flightData()
     if form.validate_on_submit():
         return redirect(url_for('results'))
     return render_template('flights.html', title='Flight Data', form=form)
-
-
-def get_options_from_database(selected_value):
-
-    with engine.connect() as connection:
-        query_result = connection.execute(db.text(query)).fetchall()
-    return [item[0] for item in query_result]
 
 
 @app.route('/get_models', methods=['POST'])
@@ -61,6 +57,7 @@ def get_options():
     with engine.connect() as connection:
         query_result = connection.execute(db.text(query)).fetchall()
     return jsonify(options=[item[0] for item in query_result])
+
 
 @app.route('/get_years', methods=['POST'])
 def get_years():

@@ -10,7 +10,7 @@ b = os.environ.get('BEARER_KEY')
 header = {'Authorization': 'Bearer ' + b}
 url = 'https://www.carboninterface.com/api/v1/vehicle_makes'
 req = requests.get(url, headers=header)
-#pprint.pprint(req.json())\
+# pprint.pprint(req.json())\
 makes = {}
 for data in req.json():
     make = data['data']
@@ -26,8 +26,8 @@ for key in makes:
         data = car['data']
         df = pd.DataFrame(data['attributes'], index=[0])
         df['id'] = data['id']
-        df['type'] = data['type']  
-        df = df.drop('type', axis=1) 
+        df['type'] = data['type']
+        df = df.drop('type', axis=1)
         dfs.append(df)
 combined_df = pd.concat(dfs, axis=0)
 engine = db.create_engine('sqlite:///vehicles.db')
@@ -35,6 +35,5 @@ combined_df.to_sql('vehicles', con=engine, if_exists='replace', index=True)
 with engine.connect() as connection:
     query_result = connection.execute(db.text("""SELECT * FROM
     vehicles""")).fetchall()
-    print("Getting DB: \n --------- \n",pd.DataFrame(query_result))
-
-
+    print("Getting DB: \n --------- \n", pd.DataFrame(query_result))
+EcoPlanner/forms.py

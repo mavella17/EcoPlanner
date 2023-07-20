@@ -1,5 +1,6 @@
 import sqlalchemy as db
-from sqlalchemy import select, create_engine, MetaData, Table, Column, Integer, String, Float
+from sqlalchemy import select, create_engine
+from sqlalechemy import MetaData, Table, Column, Integer, String, Float
 from sqlalchemy.engine.reflection import Inspector
 
 
@@ -22,7 +23,8 @@ def users():
         metadata.create_all(engine)
     else:
         print(f"Table '{table_name}' exists in the database.")
-      
+
+
 def add_users():
     name = input("Enter name: ")
     password = input("Enter Password: ")
@@ -51,6 +53,7 @@ def add_users():
         )
         connection.execute(ins)
 
+
 def display():
     engine = create_engine('sqlite:///carbon_footprint.db')
     metadata = MetaData()
@@ -60,7 +63,7 @@ def display():
         table_name,
         metadata,
         Column('name', String(255)),
-        #Column('password', String(255)), #comment this out so it doesnt display users passwords
+        # Column('password', String(255))
         Column('trip', String(255)),
         Column('carbon_footprint', Float)
     )
@@ -75,6 +78,6 @@ def display():
             print(row)
         print("**************************************")
 
-#users() #create the table
-#add_users() #This adds the user to the table
-display() #this displays the added users
+# users() #create the table
+# add_users() #This adds the user to the table
+display()  # this displays the added users

@@ -26,10 +26,21 @@
       </ul>
     </header>
   </div>
+  <!-- feedback warnings -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+       <div class="alert alert-{{ category }}">
+         {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
   <main role="main" class="container">
     <div class="row">
       <div class="col-12">
-        <h1>Carbon Footprint</h1> {% block content %}{% endblock %}
+        <h1>EcoPlanner</h1> {% block content %}{% endblock %}
       </div>
     </div>
   </main>

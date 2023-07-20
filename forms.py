@@ -16,3 +16,9 @@ class flightData(FlaskForm):
     wherefrom = StringField('Where From?', validators=[DataRequired(), Length(min=1, max=20)])
     whereto = StringField('Where To?', validators=[DataRequired(), Length(min=1, max=20)])
     submit = SubmitField('Calculate Emissions') 
+
+#Created the register class where users can register
+class registrationData(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Sign Up!')

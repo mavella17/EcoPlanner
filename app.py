@@ -5,7 +5,7 @@ import pandas as pd
 import sqlalchemy as db
 from sqlalchemy import select
 from sqlalchemy.sql import text as sa_text
-from forms import driveData, flightData
+from forms import driveData, flightData, registrationData
 from flask_behind_proxy import FlaskBehindProxy
 
 app = Flask(__name__)
@@ -45,6 +45,13 @@ def flight_data():
         return redirect(url_for('results'))
     return render_template('flights.html', title='Flight Data', form=form)
 
+@app.route("/register", methods=['GET', 'POST'])
+def registration_Data():
+    form = registrationData()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}', 'success!')
+        return redirect(url_for('home'))
+    return render_template('register.html', title='Register', form=form)
 
 def get_options_from_database(selected_value):
 

@@ -78,6 +78,7 @@ def display():
             print(row)
         print("**************************************")
 
+
 # users() #create the table
 # add_users() #This adds the user to the table
 display()  # this displays the added users

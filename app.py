@@ -1,17 +1,14 @@
 import git
 from flask import Flask, jsonify, render_template
-from flask import url_for, flash, redirect, request, session
+from flask import url_for, flash, redirect, request
 from forms import driveData, flightData
-from flask_behind_proxy import FlaskBehindProxy
 import pandas as pd
 import sqlalchemy as db
 from sqlalchemy import select
 from sqlalchemy.sql import text as sa_text
-
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
-
 @app.route("/")
 @app.route("/home")
 def home():

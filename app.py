@@ -48,6 +48,7 @@ def flight_data():
         return redirect(url_for('results'))
     return render_template('flights.html', title='Flight Data', form=form)
 
+
 @app.route("/register", methods=['GET', 'POST'])
 def registration_Data():
     form = registrationData()
@@ -55,6 +56,7 @@ def registration_Data():
         flash(f'Account created for {form.username.data}', 'success!')
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route('/get_models', methods=['POST'])
 def get_options():

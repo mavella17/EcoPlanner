@@ -36,4 +36,3 @@ with engine.connect() as connection:
     query_result = connection.execute(db.text("""SELECT * FROM
     vehicles""")).fetchall()
     print("Getting DB: \n --------- \n", pd.DataFrame(query_result))
-EcoPlanner/forms.py

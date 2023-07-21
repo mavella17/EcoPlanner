@@ -132,43 +132,39 @@
             <select name="model" id="modelDropDown" class='topbottomspacing' style="width:60%">
                 <option value="">Models</option>
             </select>
-
             <select name="year" id="yearDropDown" class='topbottomspacing' style="width:60%">
                 <option value="">Year</option>
             </select>
             <!-- validation for distance -->
-            <div class="form-group">
-                {{ form.distance.label(class='form-control-label') }} {% if form.distance.errors %} {{ form.distance(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback"> {% for error in form.distance.errors %} <span>{{error}}</span> {% endfor %} </div> {% else %} {{ form.distance(class="form-control form-control-lg") }} {% endif %}
-            </div>
+            <label for="distance">Distance:</label>
+            <input type="number" id="distance" name="distance" required min="0" max="1000000">
         </fieldset>
         <!-- submit button -->
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
     </form>
+    <div id="resultContainer"></div>
 </div>
 <!-- JavaScript/jQuery -->
-
 <script>
-
     function updateSecondDropdown() {
         const firstDropdownValue = $('#makeDropDown').val();
         console.log(firstDropdownValue)
-
         $.ajax({
             type: 'POST',
             url: '/get_models',
-            data: {'selected_value': firstDropdownValue},
+            data: {
+                'selected_value': firstDropdownValue
+            },
             dataType: 'json',
             success: function(data) {
                 const options = data.options;
                 console.log(options)
                 const secondDropdown = $('#modelDropDown');
-
                 secondDropdown.empty();
                 options.sort()
-                for (const option of options) {
+                for(const option of options) {
                     secondDropdown.append($('<option>', {
                         value: option,
                         text: option
@@ -176,7 +172,7 @@
                 }
             },
             error: function(xhr, status, error) {
-                console.error(error); 
+                console.error(error);
             }
         });
     }
@@ -184,46 +180,81 @@
     function update3rdDD() {
         const secondDropdownValue = $('#modelDropDown').val();
         console.log(secondDropdownValue)
-
         $.ajax({
             type: 'POST',
             url: '/get_years',
-            data: {'selected_value': secondDropdownValue},
+            data: {
+                'selected_value': secondDropdownValue
+            },
             dataType: 'json',
             success: function(data) {
                 const options = data.options;
                 console.log(options)
                 const thirdDropdown = $('#yearDropDown');
-
                 thirdDropdown.empty();
                 options.sort()
-                for (const option of options) {
+                for(const option of options) {
                     thirdDropdown.append($('<option>', {
-                        value: option,
-                        text: option
+                        value: option[1],
+                        text: option[0]
                     }));
                 }
             },
             error: function(xhr, status, error) {
-                console.error(error); 
+                console.error(error);
             }
         });
     }
-
     $('#makeDropDown').on('change', function() {
         console.log('CHANGE 2nd')
         updateSecondDropdown();
-        
     });
-
     $('#modelDropDown').on('change', function() {
         console.log('CHANGE 3rd')
         update3rdDD();
-
     });
-
     updateSecondDropdown();
     update3rdDD();
-</script>
-
- {% endblock content %}
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const resultContainer = document.getElementById('resultContainer');
+        form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        console.log("reached 1")
+        let id = document.querySelector("select[name=year]").value;
+        console.log(id)
+        let distance = document.querySelector("input[name=distance]").value;
+        console.log(distance)
+        const data = {
+            type: "vehicle",
+            distance_unit: "mi",
+            distance_value: distance,
+            vehicle_model_id: id
+        };
+        api = "{{url_for('drive_lookup')}}"
+        fetch(api, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // Convert the data object to JSON format
+        }).then(function(response){
+            console.log("reached 2")
+            return response.json();
+        }).then(function(response) {
+            const { carbon_g, carbon_kg, carbon_lb } = response.data.attributes;
+            const resultHTML = `
+            <p>Estimated Carbon Emissions:</p>
+            <ul>
+            <li>Grams: ${carbon_g}</li>
+            <li>Kilograms: ${carbon_kg}</li>
+            <li>Pounds: ${carbon_lb}</li>
+            </ul>
+            `;
+            resultContainer.innerHTML = resultHTML
+            }).catch(function(error) {
+                console.log("Error in async");
+            });
+        });
+    });
+</script> {% endblock content %}

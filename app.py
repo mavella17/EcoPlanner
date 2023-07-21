@@ -2,14 +2,18 @@ import git
 from flask import Flask, jsonify, render_template
 from flask import url_for, flash, redirect, request, session
 import pandas as pd
+from dotenv import load_dotenv
+import os
 import sqlalchemy as db
 from sqlalchemy import select
+import requests
 from sqlalchemy.sql import text as sa_text
 from forms import driveData, flightData, registrationData
 from flask_behind_proxy import FlaskBehindProxy
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
+load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 
@@ -69,14 +73,25 @@ def get_options():
 
 @app.route('/get_years', methods=['POST'])
 def get_years():
-
     selected_value = request.form['selected_value']
-    query = "SELECT distinct year FROM vehicles WHERE name = '"
+    query = "SELECT distinct year, id FROM vehicles WHERE name = '"
     query += str(selected_value) + "';"
     with engine.connect() as connection:
         query_result = connection.execute(db.text(query)).fetchall()
-    return jsonify(options=[item[0] for item in query_result])
+    return jsonify(options=[(item[0],item[1]) for item in query_result])
 
+@app.route('/drive_lookup', methods=['POST'])
+def drive_lookup():
+    bkey = os.environ.get('BEARER_KEY')
+    headers = {
+                'Authorization': 'Bearer ' + bkey, 
+                'Content-Type': 'application/json'
+            }
+    api = 'https://www.carboninterface.com/api/v1/estimates'
+    data = request.get_json()
+    req = requests.post(api, headers=headers, json=data)
+    return jsonify(req.json())
+    
 
 @app.route('/travel')
 def travel():

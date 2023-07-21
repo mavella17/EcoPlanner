@@ -14,7 +14,7 @@ from sqlalchemy.sql import text as sa_text
 
 engine = db.create_engine('sqlite:///vehicles.db')
 selected_value = 'Acura'
-query = "SELECT * FROM vehicles where name = 'Integra';"
+query = "SELECT distinct year, id FROM vehicles WHERE name = 'Integra';"
 with engine.connect() as connection:
     query_result = connection.execute(db.text(query)).fetchall()
     print("Getting DB: \n --------- \n", pd.DataFrame(query_result))

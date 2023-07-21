@@ -4,7 +4,6 @@
     'Helvetica Neue', sans-serif;
 }
 
-
 /* css for the spinning earth animation */
 #earth {
   background-image: url("earth_anim.gif");
@@ -85,5 +84,3 @@ span {
             -webkit-text-fill-color: transparent;
             -webkit-background-clip: text;
 }
-
-

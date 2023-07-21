@@ -11,13 +11,14 @@ import requests
 from sqlalchemy.sql import text as sa_text
 from forms import driveData, flightData, registrationData
 from flask_behind_proxy import FlaskBehindProxy
+from users_db import users, add_users, display
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
 load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
-
+engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
 @app.route("/")
 @app.route("/home")
@@ -58,6 +59,9 @@ def flight_data():
 def registration_Data():
     form = registrationData()
     if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        add_users(username, password)
         flash(f'Account created for {form.username.data}', 'success!')
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
@@ -102,4 +106,5 @@ def travel():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port="6788")
+    display()
+    #app.run(debug=True, host="0.0.0.0", port="5000")

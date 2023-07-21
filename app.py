@@ -22,7 +22,6 @@ def home():
 
 
 # used with webhooks to update server
-@app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
         repo = git.Repo('/home/EcoPlanner/EcoPlanner')
@@ -79,5 +78,10 @@ def get_years():
     return jsonify(options=[item[0] for item in query_result])
 
 
+@app.route('/travel')
+def travel():
+    return render_template('travel.html')
+
+
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port="6788")

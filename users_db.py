@@ -1,6 +1,6 @@
 import sqlalchemy as db
 from sqlalchemy import select, create_engine
-from sqlalechemy import MetaData, Table, Column, Integer, String, Float
+from sqlalchemy import MetaData, Table, Column, Integer, String, Float
 from sqlalchemy.engine.reflection import Inspector
 
 

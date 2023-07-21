@@ -78,20 +78,21 @@ def get_years():
     query += str(selected_value) + "';"
     with engine.connect() as connection:
         query_result = connection.execute(db.text(query)).fetchall()
-    return jsonify(options=[(item[0],item[1]) for item in query_result])
+    return jsonify(options=[(item[0], item[1]) for item in query_result])
+
 
 @app.route('/drive_lookup', methods=['POST'])
 def drive_lookup():
     bkey = os.environ.get('BEARER_KEY')
     headers = {
-                'Authorization': 'Bearer ' + bkey, 
+                'Authorization': 'Bearer ' + bkey,
                 'Content-Type': 'application/json'
             }
     api = 'https://www.carboninterface.com/api/v1/estimates'
     data = request.get_json()
     req = requests.post(api, headers=headers, json=data)
     return jsonify(req.json())
-    
+
 
 @app.route('/travel')
 def travel():

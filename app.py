@@ -4,6 +4,7 @@ from flask import url_for, flash, redirect, request, session
 import pandas as pd
 from dotenv import load_dotenv
 import os
+from key import BKEY
 import sqlalchemy as db
 from sqlalchemy import select
 import requests
@@ -83,7 +84,7 @@ def get_years():
 
 @app.route('/drive_lookup', methods=['POST'])
 def drive_lookup():
-    bkey = os.environ.get('BEARER_KEY')
+    bkey = BKEY
     headers = {
                 'Authorization': 'Bearer ' + bkey, 
                 'Content-Type': 'application/json'

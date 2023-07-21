@@ -2,6 +2,7 @@ import git
 from flask import Flask, jsonify, render_template
 from flask import url_for, flash, redirect, request, session
 import pandas as pd
+from dotenv import load_dotenv
 import os
 import sqlalchemy as db
 from sqlalchemy import select
@@ -12,6 +13,7 @@ from flask_behind_proxy import FlaskBehindProxy
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
+load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 

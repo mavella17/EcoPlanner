@@ -136,12 +136,19 @@
                 <option value="">Year</option>
             </select>
             <!-- validation for distance -->
-            <label for="distance">Distance:</label>
-            <input type="number" id="distance" name="distance" required min="0" max="1000000">
+            <label for="distance"></label>
+            <input type="number" id="distance" name="distance" required min="0" max="1000000" style="width:60%" class="topbottomspacing" placeholder="Enter distance traveled">
         </fieldset>
+        <!-- creating a mi/km checkbox -->
+        <label class="radio-inline">
+            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="Miles"> mi
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="Kilometer"> km
+          </label>
         <!-- submit button -->
         <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
+            {{ form.submit(class="btn btn-dark btn-default gradient") }}
         </div>
     </form>
     <div id="resultContainer"></div>

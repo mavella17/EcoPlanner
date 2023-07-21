@@ -5,8 +5,10 @@ from sqlalchemy.engine.reflection import Inspector
 
 table_name = 'users_table'
 
+
 def users():
-    engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+    engine = db.create_engine(
+        'sqlite:///EcoPlanner/carbon_footprint.db')
     metadata = MetaData()
 
     your_table = Table(
@@ -26,7 +28,6 @@ def users():
 
 
 def add_users(name, password):
-
     engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
     metadata = MetaData()
@@ -39,7 +40,8 @@ def add_users(name, password):
         Column('carbon_footprint', Float)
     )
     with engine.connect() as connection:
-        existing_user = connection.execute(select([your_table]).where(your_table.c.name == name)).fetchone()
+        existing_user = connection.execute(
+            select([your_table]).where(your_table.c.name == name)).fetchone()
         if existing_user:
             print("Username already exists")
             return
@@ -48,7 +50,7 @@ def add_users(name, password):
             password=password,
         )
         connection.execute(ins)
-    
+
 
 def display():
     engine = create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
@@ -74,6 +76,5 @@ def display():
         print("**************************************")
 
 
-# users() 
-# add_users()
-# display()
+display()
+

@@ -27,7 +27,6 @@ def home():
 
 
 # used with webhooks to update server
-@app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
         repo = git.Repo('/home/EcoPlanner/EcoPlanner')
@@ -80,20 +79,26 @@ def get_years():
     query += str(selected_value) + "';"
     with engine.connect() as connection:
         query_result = connection.execute(db.text(query)).fetchall()
-    return jsonify(options=[(item[0],item[1]) for item in query_result])
+    return jsonify(options=[(item[0], item[1]) for item in query_result])
+
 
 @app.route('/drive_lookup', methods=['POST'])
 def drive_lookup():
     bkey = BKEY
     headers = {
-                'Authorization': 'Bearer ' + bkey, 
+                'Authorization': 'Bearer ' + bkey,
                 'Content-Type': 'application/json'
             }
     api = 'https://www.carboninterface.com/api/v1/estimates'
     data = request.get_json()
     req = requests.post(api, headers=headers, json=data)
     return jsonify(req.json())
-    
+
+
+@app.route('/travel')
+def travel():
+    return render_template('travel.html')
+
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port="6788")

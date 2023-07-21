@@ -27,6 +27,7 @@ def home():
 
 
 # used with webhooks to update server
+@app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
         repo = git.Repo('/home/EcoPlanner/EcoPlanner')

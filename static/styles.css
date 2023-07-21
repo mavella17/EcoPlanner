@@ -84,3 +84,11 @@ span {
             -webkit-text-fill-color: transparent;
             -webkit-background-clip: text;
 }
+
+#resultContainer {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    margin-top:20px;
+}

@@ -31,5 +31,5 @@ class flightData(FlaskForm):
 class registrationData(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField(validators=[DataRequired()])
     submit = SubmitField('Sign Up!')

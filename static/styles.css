@@ -3,30 +3,7 @@
     'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 
     'Helvetica Neue', sans-serif;
 }
-/* styling for forms */
-#flight-content{
-.form-group{
-  display: flex;
-  justify-content:space-between;
-  /* align-content: space-between; */
-  margin: 40px;
-  gap: 0.5px;
-} 
-.form-control{
-  border: .2em solid black;
 
-}
-
-.arrows{
-  display: flex;
-  width: 20%;
-  height: 40%;
-  margin: auto;
-  align-content: space-between;
-  gap: 90%;
-
-}
-}
 /* css for the spinning earth animation */
 #earth {
   background-image: url("earth_anim.gif");

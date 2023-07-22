@@ -1,4 +1,35 @@
-{% extends 'layout.html' %} {% block content %} <div class="drive-content">
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="./{{ url_for('static', filename='./forms.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+<!-- navbar  -->
+<header>
+  <a href="#" class="logo">EcoPlanner</a>
+  <ul class="navigation">
+    <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
+    <li><a href="{{ url_for('travel')}}">Travel</a></li>
+    <li><a href="{{ url_for('registration_Data') }}">Login</a></li>
+    <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
+  </ul>
+</header>
+
+<br><br><br><br><br><br><br>
+{% block content %} 
+<div class="form-holder">
+    <h3>Calculating Driving Emissions</h3>
+        <p>Enter car make/model and distance to calculate carbon emissions.</p>
+<div class="drive-content">
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset class='form-group'>
@@ -138,7 +169,7 @@
             <!-- validation for distance -->
             <label for="distance"></label>
             <input type="number" id="distance" name="distance" required min="0" max="1000000" style="width:60%" class="topbottomspacing" placeholder="Enter distance traveled">
-        </fieldset>
+        
         <!-- creating a mi/km checkbox -->
         <label class="radio-inline">
             <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="Miles"> mi
@@ -147,11 +178,13 @@
             <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="Kilometer"> km
           </label>
         <!-- submit button -->
-        <div class="form-group">
-            {{ form.submit(class="btn btn-dark btn-default gradient") }}
+        <div class="form-btn">
+            {{ form.submit(class="btn btn-dark btn-default gradient topbottomspacing") }}
         </div>
+    </fieldset>
     </form>
     <div id="resultContainer"></div>
+</div>
 </div>
 <!-- JavaScript/jQuery -->
 <script>
@@ -264,4 +297,7 @@
             });
         });
     });
-</script> {% endblock content %}
+</script> 
+{% endblock content %}
+</body>
+</html>

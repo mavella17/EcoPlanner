@@ -1,12 +1,12 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="flight-content">
+    <div id="flight-content">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class = 'form-group'>
                 <!-- wherefrom airport data -->
             <div class="form-group">
-                {{ form.wherefrom.label(class='form-control-label') }}
+                <!-- {{ form.wherefrom.label(class='form-control-label') }} -->
                 {% if form.wherefrom.errors %}
                 {{ form.wherefrom(class="form-control form-control-lg is-invalid") }}
                 <div class="invalid-feedback">
@@ -15,12 +15,16 @@
                 {% endfor %}
                 </div>
                 {% else %}
-                    {{ form.wherefrom(class="form-control form-control-lg") }}
+                    {{ form.wherefrom(class="form-control form-control-lg form-flight", style='width:90%', placeholder="Where From?") }}
                 {% endif %}
+            </div>
+            <!-- adding arrows -->
+            <div class="arrows">
+                <img src="./static/exchange.png" alt="Two arrows" style="width:20%">
             </div>
            <!-- validation for whereto airport -->
            <div class="form-group">
-            {{ form.whereto.label(class='form-control-label') }}
+            <!-- {{ form.whereto.label(class='form-control-label') }} -->
             {% if form.whereto.errors %}
             {{ form.whereto(class="form-control form-control-lg is-invalid") }}
             <div class="invalid-feedback">
@@ -29,13 +33,27 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.whereto(class="form-control form-control-lg") }}
+
+                {{ form.whereto(class="form-control form-control-lg form-flight", style='width:90%', placeholder="Where To?") }}
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.passengers.label(class='form-control-label') }}
+            {% if form.passengers.errors %}
+            {{ form.passengers(class="form-control form-control is-invalid") }}
+            <div class="invalid-feedback">
+            {% for error in form.passengers.errors %}
+                <span>{{error}}</span>
+            {% endfor %}
+            </div>
+            {% else %}
+                {{ form.passengers(class="form-control form-control-lg", style='width:40%', placeholder="Passengers") }}
             {% endif %}
         </div>
             </fieldset>
               <!-- submit button -->
            <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
+            {{ form.submit(class="btn btn-dark btn-default gradient") }}
            </div>
         </form>
     </div>

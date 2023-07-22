@@ -22,6 +22,8 @@ class flightData(FlaskForm):
                             validators=[DataRequired(), Length(min=1, max=20)])
     whereto = StringField('Where To?',
                           validators=[DataRequired(), Length(min=1, max=20)])
+    passengers = IntegerField("Passengers:",
+                          validators=[DataRequired()])
     submit = SubmitField('Calculate Emissions')
 
 

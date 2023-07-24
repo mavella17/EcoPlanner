@@ -18,7 +18,7 @@ proxied = FlaskBehindProxy(app)
 load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
-engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+# footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
 @app.route("/")
 @app.route("/home")

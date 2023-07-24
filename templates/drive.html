@@ -301,6 +301,7 @@
             console.log("reached 2")
             return response.json();
         }).then(function(response) {
+            console.log(response.data.attributes)
             const { carbon_g, carbon_kg, carbon_lb } = response.data.attributes;
             const resultHTML = `
             <p>Estimated Carbon Emissions:</p>

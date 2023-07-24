@@ -1,11 +1,12 @@
 import git
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, logging
 from flask import url_for, flash, redirect, request, session
 import pandas as pd
 from dotenv import load_dotenv
 import os
 from key import BKEY
 import sqlalchemy as db
+import pprint
 from sqlalchemy import select
 import requests
 from sqlalchemy.sql import text as sa_text
@@ -18,7 +19,7 @@ proxied = FlaskBehindProxy(app)
 load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
-# footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
 
 @app.route("/")
@@ -98,6 +99,26 @@ def lookup():
     api = 'https://www.carboninterface.com/api/v1/estimates'
     data = request.get_json()
     req = requests.post(api, headers=headers, json=data)
+    if req.status_code >= 200 and req.status_code < 300:
+        if data['type'] == 'vehicle':
+            row = req.json()['data']['attributes']
+            df = pd.DataFrame(row, index=[0])
+            df.to_sql('drives', con=footprintEngine, if_exists='replace', index=True)
+        else:
+            row = req.json()['data']['attributes']
+            df = pd.DataFrame(row, index=[0])
+            temp = pd.DataFrame(df['legs'][0], index=[0])
+            df.drop('legs',axis=1,inplace=True)
+            result_df = pd.concat([df,temp],axis = 1)
+            result_df.to_sql('flights', con=footprintEngine, if_exists='replace', index=True)
+        query = "SELECT * from drives"
+        with footprintEngine.connect() as connection:
+            query_result = connection.execute(db.text(query)).fetchall()
+            print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
+            query = "SELECT * from flights"
+            query_result = connection.execute(db.text(query)).fetchall()
+            print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
+ 
     return jsonify(req.json())
 
 

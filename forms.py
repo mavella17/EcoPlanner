@@ -9,7 +9,7 @@ from wtforms.validators import EqualTo, InputRequired, ValidationError
 class driveData(FlaskForm):
     vehiclemodel = StringField('Vehicle Model', validators=[InputRequired()])
     # TODO: add a feature where distance can be change from miles to kilometers
-    distance = IntegerField('Distance', validators=[DataRequired()])
+    distance = IntegerField('Distance', validators=[DataRequired(),NumberRange(min=1)])
     distance_type = SelectField('Miles or Kilometers',
                                 choices=[('mi', 'Miles'),
                                          ('km', 'Kilometers')])

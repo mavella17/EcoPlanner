@@ -111,13 +111,13 @@ def lookup():
             df.drop('legs',axis=1,inplace=True)
             result_df = pd.concat([df,temp],axis = 1)
             result_df.to_sql('flights', con=footprintEngine, if_exists='replace', index=True)
-        query = "SELECT * from drives"
-        with footprintEngine.connect() as connection:
-            query_result = connection.execute(db.text(query)).fetchall()
-            print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
-            query = "SELECT * from flights"
-            query_result = connection.execute(db.text(query)).fetchall()
-            print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
+        # query = "SELECT * from drives"
+        # with footprintEngine.connect() as connection:
+            # query_result = connection.execute(db.text(query)).fetchall()
+            # print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
+            # query = "SELECT * from flights"
+            # query_result = connection.execute(db.text(query)).fetchall()
+            # print("Getting Drives: \n --------- \n", pd.DataFrame(query_result))
  
     return jsonify(req.json())
 
@@ -137,6 +137,7 @@ def poundsCO2():
         flightLBS = float(pd.DataFrame(query_result)['sum_value'])
         print("Getting DB: \n --------- \n", driveLBS + flightLBS)
         return jsonify({"carbonlbs" : driveLBS + flightLBS})
+
 @app.route('/results')
 def results():
     return render_template('results.html')

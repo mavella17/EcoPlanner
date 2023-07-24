@@ -126,7 +126,17 @@ def lookup():
 def travel():
     return render_template('travel.html')
 
-
+@app.route('/poundsCO2')
+def poundsCO2():
+    with footprintEngine.connect() as connection:
+        query = "SELECT SUM(carbon_lb) AS sum_value from drives"
+        query_result = connection.execute(db.text(query)).fetchall()
+        driveLBS = float(pd.DataFrame(query_result)['sum_value'])
+        query = "SELECT SUM(carbon_lb) AS sum_value from flights"
+        query_result = connection.execute(db.text(query)).fetchall()
+        flightLBS = float(pd.DataFrame(query_result)['sum_value'])
+        print("Getting DB: \n --------- \n", driveLBS + flightLBS)
+        return jsonify({"carbonlbs" : driveLBS + flightLBS})
 @app.route('/results')
 def results():
     return render_template('results.html')

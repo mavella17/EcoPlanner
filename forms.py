@@ -29,10 +29,16 @@ class flightData(FlaskForm):
                             validators=[DataRequired(), Length(min=1, max=3),
                                         validate_code])
     whereto = StringField('Where To?',
+<<<<<<< HEAD
                           validators=[DataRequired(), Length(min=1, max=3),
                                       validate_code])
     passengers = IntegerField('Number of Passengers',
                           validators=[DataRequired(),NumberRange(min=1, max=10)])
+=======
+                          validators=[DataRequired(), Length(min=1, max=20)])
+    passengers = IntegerField("Passengers:",
+                          validators=[DataRequired()])
+>>>>>>> 93f864ec89cb07b3c58570066a7c3b1f9fd6d986
     submit = SubmitField('Calculate Emissions')
 
 
@@ -40,5 +46,5 @@ class flightData(FlaskForm):
 class registrationData(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField(validators=[DataRequired()])
     submit = SubmitField('Sign Up!')

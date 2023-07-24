@@ -183,10 +183,10 @@
         
         <!-- creating a mi/km checkbox -->
         <label class="radio-inline">
-            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="Miles"> mi
+            <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="mi" checked> Mile(s)
           </label>
           <label class="radio-inline">
-            <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="Kilometer"> km
+            <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="km"> Kilometer(s)
           </label>
         <!-- submit button -->
         <div class="form-btn">
@@ -275,14 +275,22 @@
         let id = document.querySelector("select[name=year]").value;
         console.log(id)
         let distance = document.querySelector("input[name=distance]").value;
+        const radioMiles = document.getElementById("inlineRadio1");
+        const radioKilometer = document.getElementById("inlineRadio2");
+        let unit;
+        if (radioKilometer.checked) {
+            unit =  radioKilometer.value;
+        } else {
+            unit = radioMiles.value;
+        } 
         console.log(distance)
         const data = {
             type: "vehicle",
-            distance_unit: "mi",
+            distance_unit: unit,
             distance_value: distance,
             vehicle_model_id: id
         };
-        api = "{{url_for('drive_lookup')}}"
+        api = "{{url_for('lookup')}}"
         fetch(api, {
             method: 'POST',
             headers: {

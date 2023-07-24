@@ -88,8 +88,8 @@ def get_years():
     return jsonify(options=[(item[0], item[1]) for item in query_result])
 
 
-@app.route('/drive_lookup', methods=['POST'])
-def drive_lookup():
+@app.route('/lookup', methods=['POST'])
+def lookup():
     bkey = BKEY
     headers = {
                 'Authorization': 'Bearer ' + bkey,

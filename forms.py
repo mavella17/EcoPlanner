@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms import BooleanField, IntegerField, SelectField, RadioField
-from wtforms.validators import DataRequired, Length, Email
-from wtforms.validators import EqualTo, InputRequired
+from wtforms.validators import DataRequired, Length, Email, NumberRange
+from wtforms.validators import EqualTo, InputRequired, ValidationError
 
 
 # create a class to encapsulate data from the drive form
@@ -18,12 +18,19 @@ class driveData(FlaskForm):
 
 # create a class to encapsulate data from the flights form
 class flightData(FlaskForm):
-    wherefrom = StringField('Where From?',
-                            validators=[DataRequired(), Length(min=1, max=20)])
-    whereto = StringField('Where To?',
-                          validators=[DataRequired(), Length(min=1, max=20)])
-    passengers = IntegerField("Passengers:",
-                          validators=[DataRequired()])
+    def validate_code(form, field):
+        airports = airportsdata.load('IATA').keys()
+        if field.data.upper() not in airports:
+            raise ValidationError('Not a valid code')
+   
+    wherefrom = StringField('Origin: ',
+                            validators=[DataRequired(), Length(min=1, max=3),
+                                        validate_code])
+    whereto = StringField('Destination: ',
+                          validators=[DataRequired(), Length(min=1, max=3),
+                                      validate_code])
+    passengers = IntegerField('Passengers:',
+                          validators=[DataRequired(),NumberRange(min=1, max=20)])
     submit = SubmitField('Calculate Emissions')
 
 

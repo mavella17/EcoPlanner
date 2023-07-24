@@ -44,8 +44,8 @@ def drive_data():
     form = driveData()
     if form.validate_on_submit():
         return redirect(url_for('results'))
-    return render_template('drive.html', title='Drive Data')
-    form=form
+    return render_template('drive.html', title='Drive Data', form=form)
+
 
 @app.route('/flights', methods=['GET', 'POST'])
 def flight_data():
@@ -53,7 +53,6 @@ def flight_data():
     if form.validate_on_submit():
         return redirect(url_for('results'))
     return render_template('flights.html', title='Flight Data', form=form)
-
 
 
 @app.route("/register", methods=['GET', 'POST'])

@@ -3,12 +3,15 @@ from sqlalchemy import select, create_engine
 from sqlalchemy import MetaData, Table, Column, Integer, String, Float
 from sqlalchemy.engine.reflection import Inspector
 
+table_name = 'users_table'
+
 
 def users():
-    engine = db.create_engine('sqlite:///carbon_footprint.db')
+
+    engine = db.create_engine(
+        'sqlite:///EcoPlanner/carbon_footprint.db')
     metadata = MetaData()
 
-    table_name = 'users_table'
     your_table = Table(
         table_name,
         metadata,
@@ -25,16 +28,10 @@ def users():
         print(f"Table '{table_name}' exists in the database.")
 
 
-def add_users():
-    name = input("Enter name: ")
-    password = input("Enter Password: ")
-    trip = input("Trip: ")
-    carbon_footprint = float(input("Carbon Footprint: "))
-
-    engine = db.create_engine('sqlite:///carbon_footprint.db')
+def add_users(name, password):
+    engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
     metadata = MetaData()
-    table_name = 'users_table'
     your_table = Table(
         table_name,
         metadata,
@@ -43,27 +40,28 @@ def add_users():
         Column('trip', String(255)),
         Column('carbon_footprint', Float)
     )
-
     with engine.connect() as connection:
+        existing_user = connection.execute(
+            select([your_table]).where(your_table.c.name == name)).fetchone()
+        if existing_user:
+            print("Username already exists")
+            return
         ins = your_table.insert().values(
             name=name,
             password=password,
-            trip=trip,
-            carbon_footprint=carbon_footprint
         )
         connection.execute(ins)
 
 
 def display():
-    engine = create_engine('sqlite:///carbon_footprint.db')
+    engine = create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
     metadata = MetaData()
 
-    table_name = 'users_table'
     your_table = Table(
         table_name,
         metadata,
         Column('name', String(255)),
-        # Column('password', String(255))
+        # Column('password', String(255)),
         Column('trip', String(255)),
         Column('carbon_footprint', Float)
     )
@@ -79,6 +77,4 @@ def display():
         print("**************************************")
 
 
-# users() #create the table
-# add_users() #This adds the user to the table
-display()  # this displays the added users
+display()

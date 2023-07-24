@@ -43,7 +43,7 @@
                 {% endfor %}
                 </div>
                 {% else %}
-                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where From?") }}
+                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Origin") }}
                 {% endif %}
             <!-- adding arrows-->
             <div class="arrows" style="float:left">
@@ -60,7 +60,7 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where To?") }}
+                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Destination") }}
             {% endif %}
         </div>
         <div class="col-md-12 form-passengers">
@@ -84,7 +84,52 @@
         </fieldset>
         </form>
     </div>
+    <div id="resultContainer"></div>
 </div>
 {% endblock content %}
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const resultContainer = document.getElementById('resultContainer');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            console.log("reached 1")
+            let origin = document.querySelector("input[name=wherefrom]").value.toUpperCase();
+            let destination = document.querySelector("input[name=whereto]").value.toUpperCase();
+            let numPass = document.querySelector("input[name=passengers]").value;
+            const data = {
+                type: "flight",
+                passengers: numPass,
+                legs: [
+                    {departure_airport: origin, destination_airport: destination}
+                ]
+            };
+        api = "{{url_for('lookup')}}"
+        fetch(api, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // Convert the data object to JSON format
+        }).then(function(response){
+            console.log("reached 2")
+            return response.json();
+        }).then(function(response) {
+            const { carbon_g, carbon_kg, carbon_lb } = response.data.attributes;
+            const resultHTML = `
+            <p>Estimated Carbon Emissions:</p>
+            <ul>
+            <li>Grams: ${carbon_g}</li>
+            <li>Kilograms: ${carbon_kg}</li>
+            <li>Pounds: ${carbon_lb}</li>
+            </ul>
+            `;
+            resultContainer.innerHTML = resultHTML
+            }).catch(function(error) {
+                console.log("Error in async");
+            });
+        });
+    });
+</script>
 </html>

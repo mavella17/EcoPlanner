@@ -28,7 +28,7 @@ def home():
                            text='This is the home page')
 
 
-#used with webhooks to update server
+# used with webhooks to update server
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':

@@ -29,8 +29,9 @@ class flightData(FlaskForm):
 
 # Created the register class where users can register
 class registrationData(FlaskForm):
-    username = StringField('Username',
+    username = StringField('Username:',
                            validators=[DataRequired(), Length(min=2, max=20)])
-    password = PasswordField(validators=[DataRequired()])
+    password = PasswordField('Password:',
+                           validators=[DataRequired()])
     submit = SubmitField('Sign Up!')
     

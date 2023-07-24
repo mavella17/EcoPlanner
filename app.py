@@ -100,7 +100,6 @@ def drive_lookup():
     req = requests.post(api, headers=headers, json=data)
     return jsonify(req.json())
 
-
 @app.route('/travel')
 def travel():
     return render_template('travel.html')

@@ -1,42 +1,74 @@
-{% extends 'layout.html' %}
-{% block content %}
-    <div class="flight-content">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <fieldset class = 'form-group'>
-                <!-- wherefrom airport data -->
+{% extends 'layout.html' %} {% block content %} <div class="flight-content">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class='form-group'>
+            <!-- wherefrom airport data -->
             <div class="form-group">
-                {{ form.wherefrom.label(class='form-control-label') }}
-                {% if form.wherefrom.errors %}
-                {{ form.wherefrom(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
-                {% for error in form.wherefrom.errors %}
-                    <span>{{error}}</span>
-                {% endfor %}
-                </div>
-                {% else %}
-                    {{ form.wherefrom(class="form-control form-control-lg") }}
-                {% endif %}
+                {{ form.wherefrom.label(class='form-control-label') }} {% if form.wherefrom.errors %} {{ form.wherefrom(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback"> {% for error in form.wherefrom.errors %} <span>{{error}}</span> {% endfor %} </div> {% else %} {{ form.wherefrom(class="form-control form-control-lg") }} {% endif %}
             </div>
-           <!-- validation for whereto airport -->
-           <div class="form-group">
-            {{ form.whereto.label(class='form-control-label') }}
-            {% if form.whereto.errors %}
-            {{ form.whereto(class="form-control form-control-lg is-invalid") }}
-            <div class="invalid-feedback">
-            {% for error in form.whereto.errors %}
-                <span>{{error}}</span>
-            {% endfor %}
+            <!-- validation for whereto airport -->
+            <div class="form-group">
+                {{ form.whereto.label(class='form-control-label') }} {% if form.whereto.errors %} {{ form.whereto(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback"> {% for error in form.whereto.errors %} <span>{{error}}</span> {% endfor %} </div> {% else %} {{ form.whereto(class="form-control form-control-lg") }} {% endif %}
             </div>
-            {% else %}
-                {{ form.whereto(class="form-control form-control-lg") }}
-            {% endif %}
-        </div>
-            </fieldset>
-              <!-- submit button -->
-           <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
-           </div>
-        </form>
-    </div>
-{% endblock content %}
+            <div class="form-group">
+                {{ form.passengers.label(class='form-control-label') }} {% if form.passengers.errors %} {{ form.passengers(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback"> {% for error in form.passengers.errors %} <span>{{error}}</span> {% endfor %} </div> {% else %} {{ form.passengers(class="form-control form-control-lg") }} {% endif %}
+            </div>
+</div>
+</fieldset>
+<!-- submit button -->
+<div class="form-group">
+    {{ form.submit(class="btn btn-outline-info") }}
+</div>
+<div id="resultContainer"></div>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const resultContainer = document.getElementById('resultContainer');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            let origin = document.querySelector("input[name=wherefrom]").value.toUpperCase();
+            let destination = document.querySelector("input[name=whereto]").value.toUpperCase();
+            let numPass = document.querySelector("input[name=passengers]").value;
+            const data = {
+                type: "flight",
+                passengers: numPass,
+                legs: [
+                    {departure_airport: origin, destination_airport: destination}
+                ]
+            };
+            api = "{{url_for('drive_lookup')}}"
+            fetch(api, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data) // Convert the data object to JSON format
+            }).then(function(response) {
+                console.log("reached 2")
+                return response.json();
+            }).then(function(response) {
+                const {
+                    carbon_g,
+                    carbon_kg,
+                    carbon_lb
+                } = response.data.attributes;
+                const resultHTML = `
+            <p>Estimated Carbon Emissions:</p>
+            <ul>
+            <li>Grams: ${carbon_g}</li>
+            <li>Kilograms: ${carbon_kg}</li>
+            <li>Pounds: ${carbon_lb}</li>
+            </ul>
+            `;
+                resultContainer.innerHTML = resultHTML
+            }).catch(function(error) {
+                console.log("Error in async");
+            });
+        });
+    });
+</script>
+</div> {% endblock content %}

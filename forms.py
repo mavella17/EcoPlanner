@@ -9,6 +9,7 @@ from wtforms.validators import EqualTo, InputRequired, ValidationError
 class driveData(FlaskForm):
     vehiclemodel = StringField('Vehicle Model', validators=[InputRequired()])
     # TODO: add a feature where distance can be change from miles to kilometers
+
     distance = IntegerField('Distance', validators=[DataRequired(),NumberRange(min=1)])
     distance_type = SelectField('Miles or Kilometers',
                                 choices=[('mi', 'Miles'),
@@ -18,11 +19,11 @@ class driveData(FlaskForm):
 
 # create a class to encapsulate data from the flights form
 class flightData(FlaskForm):
+
     def validate_code(form, field):
         airports = airportsdata.load('IATA').keys()
         if field.data.upper() not in airports:
             raise ValidationError('Not a valid code')
-   
     wherefrom = StringField('Origin: ',
                             validators=[DataRequired(), Length(min=3, max=3),
                                         validate_code])
@@ -36,7 +37,9 @@ class flightData(FlaskForm):
 
 # Created the register class where users can register
 class registrationData(FlaskForm):
-    username = StringField('Username',
+    username = StringField('Username:',
                            validators=[DataRequired(), Length(min=2, max=20)])
-    password = PasswordField(validators=[DataRequired()])
+    password = PasswordField('Password:',
+                           validators=[DataRequired()])
     submit = SubmitField('Sign Up!')
+    

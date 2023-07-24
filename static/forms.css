@@ -29,10 +29,11 @@ h3, p{
 }
 .flight-content .form-group{
   box-shadow: 30px 30px 80px #d3d3d3;
-  padding: 40px;
+  padding: 30px;
   display: inline-block;
   width: 100%;
   min-width: 540px;
+  max-width: 543px;
   -webkit-border-radius: 10px;
   -moz-border-radius: 10px;
   border-radius: 10px;
@@ -49,20 +50,29 @@ h3, p{
     .form-group-side .arrows{
         /* margin: 40px; */
         /* gap: 0.5px; */
-        padding-top: 2px;
+        /* padding-bottom: 3px; */
         justify-content: space-between;
     }
   .arrows{
     display: flex;
-    padding-top: 20px;
-    width: 20%;
-    height: 40%;
+    padding-top: 10px;
+    padding-left: 50px;
+    padding-bottom: 13px;
+    width: 40%;
+    height: 30%;
     margin: auto;
-    align-content: center;
+    /* align-content: center; */
     /* gap: 90%; */
   
   }
-
+.flight-content .airport{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  padding-right: 40px;
+  justify-content: space-evenly;
+  margin-bottom: 10px;
+}
 /* editing the drive form */
 
 .drive-content{
@@ -100,9 +110,17 @@ h3, p{
   border-radius: 20px;
 }
 
-.modelDropDown, .yearDropDown, .distance{
+#makeDropDown, #modelDropDown, #yearDropDown{
   display:flex;
   align-content: space-around;
+  /* border: .1px solid black; */
+  border-radius: 10px;
+  align-content: space-between;
+  margin-bottom: 5px;
+
+}
+.distance .form-control{
+  border-radius: 10px;
 }
 
 * {

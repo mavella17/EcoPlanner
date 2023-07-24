@@ -23,7 +23,7 @@
     <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
   </ul>
 </header>
-<br><br><br><br><br><br>
+
 {% block content %}
 <div class="form-holder">
     <h3>Calculating Flight Emissions</h3>
@@ -33,7 +33,7 @@
             {{ form.hidden_tag() }}
             <fieldset class = 'form-group'>
                 <!-- wherefrom airport data -->
-            <div class="col-md-12">
+            <div class="airport">
                 <!-- {{ form.wherefrom.label(class='form-control-label') }} -->
                 {% if form.wherefrom.errors %}
                 {{ form.wherefrom(class="form-control form-control-lg is-invalid") }}
@@ -43,15 +43,14 @@
                 {% endfor %}
                 </div>
                 {% else %}
-                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:40%', placeholder="Where From?") }}
+                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where From?") }}
                 {% endif %}
-            </div>
-            <!-- adding arrows -->
-            <div class="arrows">
-                <img src="./static/exchange.png" alt="Two arrows" style="width:20%">
-            </div>
+            <!-- adding arrows-->
+            <div class="arrows" style="float:left">
+                <img src="./static/exchange.png" alt="Two arrows" style="width:30%">
+            </div> 
+            
            <!-- validation for whereto airport -->
-           <div class="col-md-12">
             <!-- {{ form.whereto.label(class='form-control-label') }} -->
             {% if form.whereto.errors %}
             {{ form.whereto(class="form-control form-control-lg is-invalid") }}
@@ -61,8 +60,7 @@
             {% endfor %}
             </div>
             {% else %}
-
-                {{ form.whereto(class="form-control form-control-default form-flight", style='width:40%', placeholder="Where To?") }}
+                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where To?") }}
             {% endif %}
         </div>
         <div class="col-md-12 form-passengers">
@@ -75,13 +73,13 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.passengers(class="form-control form-control-default", style='width:40%', placeholder="Passengers") }}
+                {{ form.passengers(class="form-control form-control-default", style='width:33%', placeholder="Passengers") }}
             {% endif %}
         </div>
             
               <!-- submit button -->
            <div class="form-btn">
-            {{ form.submit(class="btn btn-dark btn-default gradient") }}
+            {{ form.submit(class="btn btn-dark btn-default gradient", style="margin-top:20px") }}
            </div>
         </fieldset>
         </form>

@@ -24,7 +24,7 @@
   </ul>
 </header>
 
-<br><br><br><br><br><br><br>
+<br>
 {% block content %} 
 <div class="form-holder">
     <h3>Calculating Driving Emissions</h3>
@@ -167,8 +167,19 @@
                 <option value="">Year</option>
             </select>
             <!-- validation for distance -->
-            <label for="distance"></label>
-            <input type="number" id="distance" name="distance" required min="0" max="1000000" style="width:60%" class="topbottomspacing" placeholder="Enter distance traveled">
+            <div class="distance">
+                <!-- {{ form.distance.label(class='form-control-label') }} -->
+                {% if form.distance.errors %}
+                {{ form.distance(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                {% for error in form.distance.errors %}
+                    <span>{{error}}</span>
+                {% endfor %}
+                </div>
+                {% else %}
+                    {{ form.distance(class="form-control form-control-default", style='width:60%', placeholder="Enter distance traveled") }}
+                {% endif %}
+            </div>
         
         <!-- creating a mi/km checkbox -->
         <label class="radio-inline">

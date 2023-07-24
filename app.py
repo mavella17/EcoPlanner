@@ -20,6 +20,7 @@ app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 # footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -61,7 +62,7 @@ def registration_Data():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        add_users(username, password)
+        # add_users(username, password)
         flash(f'Account created for {form.username.data}', 'success!')
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
@@ -105,6 +106,11 @@ def travel():
     return render_template('travel.html')
 
 
+@app.route('/results')
+def results():
+    return render_template('results.html')
+
+
 if __name__ == '__main__':
     display()
-    #app.run(debug=True, host="0.0.0.0", port="5000")
+    app.run(debug=True, host="0.0.0.0")

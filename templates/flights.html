@@ -43,7 +43,7 @@
                 {% endfor %}
                 </div>
                 {% else %}
-                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where From?") }}
+                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Origin") }}
                 {% endif %}
             <!-- adding arrows-->
             <div class="arrows" style="float:left">
@@ -60,7 +60,7 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Where To?") }}
+                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Destination") }}
             {% endif %}
         </div>
         <div class="col-md-12 form-passengers">

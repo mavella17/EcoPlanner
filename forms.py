@@ -24,10 +24,10 @@ class flightData(FlaskForm):
             raise ValidationError('Not a valid code')
    
     wherefrom = StringField('Origin: ',
-                            validators=[DataRequired(), Length(min=1, max=3),
+                            validators=[DataRequired(), Length(min=3, max=3),
                                         validate_code])
     whereto = StringField('Destination: ',
-                          validators=[DataRequired(), Length(min=1, max=3),
+                          validators=[DataRequired(), Length(min=3, max=3),
                                       validate_code])
     passengers = IntegerField('Passengers:',
                           validators=[DataRequired(),NumberRange(min=1, max=20)])

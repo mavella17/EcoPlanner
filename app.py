@@ -28,7 +28,7 @@ def home():
                            text='This is the home page')
 
 
-used with webhooks to update server
+#used with webhooks to update server
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
@@ -112,5 +112,5 @@ def results():
 
 
 if __name__ == '__main__':
-    # display()
-    app.run(debug=True, host="0.0.0.0", port="6700")
+    display()
+    app.run(debug=True, host="0.0.0.0")

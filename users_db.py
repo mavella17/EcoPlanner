@@ -7,6 +7,7 @@ table_name = 'users_table'
 
 
 def users():
+
     engine = db.create_engine(
         'sqlite:///EcoPlanner/carbon_footprint.db')
     metadata = MetaData()

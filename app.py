@@ -27,7 +27,7 @@ def home():
                            text='This is the home page')
 
 
-# used with webhooks to update server
+used with webhooks to update server
 @app.route("/update_server", methods=['POST'])
 def webhook():
     if request.method == 'POST':
@@ -44,8 +44,8 @@ def drive_data():
     form = driveData()
     if form.validate_on_submit():
         return redirect(url_for('results'))
-    return render_template('drive.html', title='Drive Data', form=form)
-
+    return render_template('drive.html', title='Drive Data')
+    form=form
 
 @app.route('/flights', methods=['GET', 'POST'])
 def flight_data():
@@ -55,13 +55,14 @@ def flight_data():
     return render_template('flights.html', title='Flight Data', form=form)
 
 
+
 @app.route("/register", methods=['GET', 'POST'])
 def registration_Data():
     form = registrationData()
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        add_users(username, password)
+        # add_users(username, password)
         flash(f'Account created for {form.username.data}', 'success!')
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
@@ -105,6 +106,11 @@ def travel():
     return render_template('travel.html')
 
 
+@app.route('/results')
+def results():
+    return render_template('results.html')
+
+
 if __name__ == '__main__':
-    display()
-    #app.run(debug=True, host="0.0.0.0", port="5000")
+    # display()
+    app.run(debug=True, host="0.0.0.0", port="6700")

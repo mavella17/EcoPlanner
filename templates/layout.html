@@ -15,28 +15,27 @@
 
 <!-- navbar  -->
 <header>
-  <a href="#" class="logo">EcoPlanner</a>
+  <a href="{{ url_for('home')}}" class="logo hello">EcoPlanner</a>
   <ul class="navigation">
     <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
     <li><a href="{{ url_for('travel')}}">Travel</a></li>
+    <li><a href="{{ url_for('results') }}">Results</a></li>
     <li><a href="{{ url_for('registration_Data') }}">Login</a></li>
     <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
   </ul>
 </header>
 
+<!-- code for the heading and earth spin -->
 <div id="earth">
   <div class="header">
-    <h2 class="fw-bold title">EcoPlanner</h2>
+    <h2 class="fw-bold title" >EcoPlanner</h2>
     <br>
     <h4 class="fw-semibold subtitle "> <span class="auto-type"></span>  travel planning</h4>
-
     <br>
     <button type="button" class="btn btn-dark btn-lg gradient" onclick="window.location.href='{{ url_for('travel')}}';" >Get Started </button>
   </div>
-  <br>
 
-  <br><br><br><br><br><br><br>
-
+  <br><br><br><br><br><br><br><br>
 
 
   <!-- code for the auto typing -->
@@ -50,8 +49,6 @@
       loop: true
     })
   </script>
-</div>
-
 
   <!-- feedback warnings -->
   {% with messages = get_flashed_messages(with_categories=true) %}

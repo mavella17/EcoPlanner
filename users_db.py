@@ -1,80 +1,87 @@
-import sqlalchemy as db
-from sqlalchemy import select, create_engine
-from sqlalchemy import MetaData, Table, Column, Integer, String, Float
-from sqlalchemy.engine.reflection import Inspector
+import sqlite3
+import random
 
+db_filename = 'EcoPlanner/carbon_footprint.db'
 table_name = 'users_table'
 
 
-def users():
+def create_table():
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
 
-    engine = db.create_engine(
-        'sqlite:///EcoPlanner/carbon_footprint.db')
-    metadata = MetaData()
-
-    your_table = Table(
-        table_name,
-        metadata,
-        Column('name', String(255)),
-        Column('password', String(255)),
-        Column('trip', String(255)),
-        Column('carbon_footprint', Float)
-    )
-    inspector = Inspector.from_engine(engine)
-    if not inspector.has_table(table_name):
-        print(f"Table '{table_name}' does not exist.")
-        metadata.create_all(engine)
-    else:
-        print(f"Table '{table_name}' exists in the database.")
+    # Create the users_table if it doesn't exist
+    create_table_query = '''
+        CREATE TABLE IF NOT EXISTS users_table (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            password TEXT NOT NULL
+        )
+    '''
+    cursor.execute(create_table_query)
+    conn.commit()
+    conn.close()
 
 
 def add_users(name, password):
-    engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
 
-    metadata = MetaData()
-    your_table = Table(
-        table_name,
-        metadata,
-        Column('name', String(255)),
-        Column('password', String(255)),
-        Column('trip', String(255)),
-        Column('carbon_footprint', Float)
-    )
-    with engine.connect() as connection:
-        existing_user = connection.execute(
-            select([your_table]).where(your_table.c.name == name)).fetchone()
-        if existing_user:
-            print("Username already exists")
-            return
-        ins = your_table.insert().values(
-            name=name,
-            password=password,
-        )
-        connection.execute(ins)
+    # Check if the username already exists
+    cursor.execute("SELECT * FROM users_table WHERE name = ?", (name,))
+    existing_user = cursor.fetchone()
+
+    if existing_user:
+        print("Username already exists")
+    else:
+        # Generate a random user_id for the new user
+        user_id = random.randint(1, 1000)
+
+        # Insert the new user into the table
+        insert_query = "INSERT INTO users_table (user_id, name, password) VALUES (?, ?, ?)"
+        cursor.execute(insert_query, (user_id, name, password))
+        conn.commit()
+        print(f"New user with ID {user_id} has been created.")
+
+    conn.close()
+
+
+def check_user_password(username, password):
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
+
+    # Retrieve the user with the given username
+    cursor.execute("SELECT * FROM users_table WHERE name = ?", (username,))
+    user = cursor.fetchone()
+
+    if user and user[2] == password:
+        return user[0]  # Return the user_id
+    else:
+        return None
+
+    conn.close()
 
 
 def display():
-    engine = create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
-    metadata = MetaData()
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
 
-    your_table = Table(
-        table_name,
-        metadata,
-        Column('name', String(255)),
-        # Column('password', String(255)),
-        Column('trip', String(255)),
-        Column('carbon_footprint', Float)
-    )
+    # Retrieve all users from the table
+    cursor.execute("SELECT * FROM users_table")
+    rows = cursor.fetchall()
 
-    with engine.connect() as conn:
-        select_query = your_table.select()
-        result = conn.execute(select_query)
-        rows = result.fetchall()
-        print("**************************************")
-        print("User Display: ")
-        for row in rows:
-            print(row)
-        print("**************************************")
+    print("**************************************")
+    print("User Display: ")
+    for row in rows:
+        print(row)
+    print("**************************************")
+
+    conn.close()
 
 
-# display()
+# create_table()
+
+# Example usage:
+# add_users('welcome1', 'welcome1')
+# check_user_password('welcome1', 'welcome1')
+display()
+

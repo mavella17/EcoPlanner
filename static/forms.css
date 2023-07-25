@@ -170,15 +170,6 @@ h3, p{
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* css for the spinning earth animation */
-#earth {
-  background-image: url("earth_anim.gif");
-  background-color: white;
-  background-repeat: no-repeat;
-  background-size: 600px;
-  background-position: right;
-}
-
 header {
   position: absolute;
   top: 0;
@@ -238,3 +229,49 @@ header {
   font-size:40px;
 }
 
+/* css for the card*/
+ /* card css */
+  .left {
+    margin-left: -5%;
+  }
+
+  .down {
+  margin-top: 30%;
+  }
+
+    .main-inner {
+      padding-left: 30%;
+    }
+   .main-box {
+  	 display: flex;
+  	 flex-direction: column;
+  	 justify-content: left;
+  	 width: 400px;
+  	 border-radius: 20px;
+  	 padding: 20px;
+  	 box-shadow: 30px 30px 80px #d3d3d3;
+  	 transition: all 200ms;
+  }
+   .main-box:hover {
+  	 box-shadow: 10px 10px 50px #a2a2a2;
+  }
+   .main h2 {
+  	 font-size: 30px;
+  	 line-height: 35px;
+  	 padding-bottom: 10px;
+  }
+   .main p {
+  	 font-size: 12px;
+  	 color: #656565;
+  }
+   .main .img {
+  	 /* display: flex;
+  	 justify-content: center; */
+     margin-left: 70px;
+  	 margin-right: 100px;
+  	 margin-top: -120px;
+  	 margin-bottom: 20px;
+  }
+   .main .img img {
+  	 width: 200px;
+  }

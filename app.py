@@ -165,6 +165,13 @@ def getFlights():
         df = pd.read_sql(query, con=footprintEngine)
         results = df.to_dict('records')
         print("FLIGHTS _____", results)
+    for record in results:
+        if 'index' in record:
+            del record['index']
+        if 'carbon_g' in record:
+            del record['carbon_g']
+        if 'carbon_kg' in record:
+            del record['carbon_kg']
     return jsonify(results)
 
 @app.route('/getDrives')
@@ -173,7 +180,15 @@ def getDrives():
         query = "SELECT * from drives"
         df = pd.read_sql(query, con=footprintEngine)
         results = df.to_dict('records')
-        print(results)
+    for record in results:
+        if 'index' in record:
+            del record['index']
+        if 'carbon_g' in record:
+            del record['carbon_g']
+        if 'carbon_kg' in record:
+            del record['carbon_kg']
+        if 'vehicle_model_id' in record:
+            del record['vehicle_model_id']
     return jsonify(results)
 
 @app.route('/results')

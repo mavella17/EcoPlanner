@@ -192,9 +192,10 @@
         <div class="form-btn">
             {{ form.submit(class="btn btn-dark btn-default gradient topbottomspacing") }}
         </div>
+        <div id="resultContainer"</div>
     </fieldset>
     </form>
-    <div id="resultContainer"></div>
+    
 </div>
 </div>
 <!-- JavaScript/jQuery -->
@@ -304,11 +305,13 @@
             console.log(response.data.attributes)
             const { carbon_g, carbon_kg, carbon_lb } = response.data.attributes;
             const resultHTML = `
+            <br>
+            <hr>
             <p>Estimated Carbon Emissions:</p>
             <ul>
-            <li>Grams: ${carbon_g}</li>
-            <li>Kilograms: ${carbon_kg}</li>
-            <li>Pounds: ${carbon_lb}</li>
+            <li>${carbon_g} Grams</li>
+            <li>${carbon_kg} Kilograms</li>
+            <li>${carbon_lb} Pounds</li>
             </ul>
             `;
             resultContainer.innerHTML = resultHTML

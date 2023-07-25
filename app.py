@@ -4,15 +4,15 @@ from flask import url_for, flash, redirect, request, session
 import pandas as pd
 from dotenv import load_dotenv
 import os
-from key import BKEY
+#from key import BKEY
 import sqlalchemy as db
 import pprint
 from sqlalchemy import select, MetaData, Table
 import requests
 from sqlalchemy.sql import text as sa_text
-from forms import driveData, flightData, registrationData
+from forms import driveData, flightData, registrationData, loginData
 from flask_behind_proxy import FlaskBehindProxy
-from users_db import users, add_users, display
+from users_db import create_table, add_users, display, check_user_password
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
@@ -63,10 +63,38 @@ def registration_Data():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        # add_users(username, password)
-        flash(f'Account created for {form.username.data}', 'success!')
-        return redirect(url_for('home'))
+        user_id = add_users(username, password)
+        if user_id:
+            flash(f'Account created for {form.username.data}', 'success!')
+            session['user_id'] = user_id
+            return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    form = loginData()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        
+        user_id = check_user_password(username, password)
+        if user_id:
+            session['user_id'] = user_id
+            flash(f'Logged in successfully as {username}', 'success!')
+            return redirect(url_for('home'))
+        else:
+            flash('Error: Invalid username or password.', 'danger')
+
+    return render_template('login.html', title='Login', form=form)
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    if request.method == 'POST':
+        session.pop('user_id', None)
+        flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
 
 
 @app.route('/get_models', methods=['POST'])
@@ -91,7 +119,7 @@ def get_years():
 
 @app.route('/clearFlights', methods=['GET'])
 def clearFlights():
-    metadata = MetaData()
+    metadata= MetaData()
     flights = Table('flights', metadata, autoload_with=footprintEngine)
     with footprintEngine.begin() as connection:
         connection.execute(flights.delete())
@@ -101,7 +129,7 @@ def clearFlights():
 
 @app.route('/clearDrives', methods=['GET'])
 def clearDrives():
-    metadata = MetaData()
+    metadata= MetaData()
     drives = Table('drives', metadata, autoload_with=footprintEngine)
     with footprintEngine.begin() as connection:
         connection.execute(drives.delete())
@@ -111,11 +139,12 @@ def clearDrives():
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
-    bkey = BKEY
+    API_KEY = 'UeGSxzCjymyaVVhbNlZYkQ'
+
     headers = {
-                'Authorization': 'Bearer ' + bkey,
-                'Content-Type': 'application/json'
-            }
+        'Authorization': 'Bearer ' + API_KEY,
+        'Content-Type': 'application/json'
+    }
     api = 'https://www.carboninterface.com/api/v1/estimates'
     data = request.get_json()
     req = requests.post(api, headers=headers, json=data)
@@ -123,16 +152,21 @@ def lookup():
         if data['type'] == 'vehicle':
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
-            df.to_sql('drives', con=footprintEngine,
-                      if_exists='append', index=True)
+            user_id = session.get('user_id')  
+            if user_id:
+                df['user_id'] = user_id  
+                df.to_sql('drives', con=footprintEngine, if_exists='append', index=True)
         else:
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
             temp = pd.DataFrame(df['legs'][0], index=[0])
             df.drop('legs', axis=1, inplace=True)
             result_df = pd.concat([df, temp], axis=1)
-            result_df.to_sql('flights', con=footprintEngine,
-                             if_exists='append', index=True)
+            user_id = session.get('user_id')  
+            if user_id:
+                result_df['user_id'] = user_id  
+                result_df.to_sql('flights', con=footprintEngine, if_exists='append', index=True)
+
     return jsonify(req.json())
 
 
@@ -152,14 +186,17 @@ def poundsCO2():
         flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
         if not flightlbs:
             flightlbs = 0
-    return jsonify({"flight": flightlbs, "drive": drivelbs})
+    return jsonify({"flight" : flightlbs, "drive" : drivelbs})
 
 
 @app.route('/getFlights')
 def getFlights():
+    user_id = session.get('user_id')
+    if user_id is None:
+        return jsonify([])
     with footprintEngine.connect() as connection:
-        query = "SELECT * from flights"
-        df = pd.read_sql(query, con=footprintEngine)
+        query = "SELECT * from flights WHERE user_id = :user_id"
+        df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
         results = df.to_dict('records')
         print("FLIGHTS _____", results)
     for record in results:
@@ -174,10 +211,15 @@ def getFlights():
 
 @app.route('/getDrives')
 def getDrives():
+    user_id = session.get('user_id')  
+    if user_id is None:
+        return jsonify([])  
+
     with footprintEngine.connect() as connection:
-        query = "SELECT * from drives"
-        df = pd.read_sql(query, con=footprintEngine)
+        query = "SELECT * from drives WHERE user_id = :user_id" 
+        df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
         results = df.to_dict('records')
+
     for record in results:
         if 'index' in record:
             del record['index']
@@ -187,6 +229,7 @@ def getDrives():
             del record['carbon_kg']
         if 'vehicle_model_id' in record:
             del record['vehicle_model_id']
+
     return jsonify(results)
 
 
@@ -196,5 +239,5 @@ def results():
 
 
 if __name__ == '__main__':
-    display()
+    # display()
     app.run(debug=True, host="0.0.0.0")

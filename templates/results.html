@@ -54,6 +54,11 @@
         </div>
     </div>
 </div>
+<h2>Flights</h2>
+<div id="table-container1"></div>
+<h2>Drives</h2>
+<div id="table-container2"></div>
+
 
 <!-- javascript for the card element -->
 <script>
@@ -112,8 +117,69 @@ function updatePoundsOfCO2() {
             });
     }
 
+function displayTable() {
+    fetch('/getFlights')
+    .then(response => response.json())
+            .then(data => {
+                const tableContainer = document.getElementById('table-container1');
+                delete data.estimated_at;
+                delete data.carbon_g;
+                delete data.carbon_kg;
+                delete data.index;
+                flightsData = JSON.stringify(data)
+                const tableHTML = createTableFromJSON(flightsData);
+                tableContainer.innerHTML = tableHTML;
+               
+            })
+            .catch(error => {
+                console.error('Error fetching flights: ', error);
+            });
+    fetch('/getDrives')
+    .then(response => response.json())
+            .then(data => {
+                const tableContainer = document.getElementById('table-container2');
+                delete data.estimated_at;
+                delete data.carbon_g;
+                delete data.carbon_kg;
+                delete data.index;
+                delete data.vehicle_model_id
+                driveData = JSON.stringify(data)
+                const tableHTML = createTableFromJSON(driveData);
+                tableContainer.innerHTML = tableHTML;
+            })
+            .catch(error => {
+                console.error('Error fetching drives:', error);
+            });
+    
+}
+function createTableFromJSON(jsonString) {
+    // Parse the JSON string to a JavaScript object
+    const data = JSON.parse(jsonString);
+
+    // Extract the property names from the first object in the array
+    const propertyNames = Object.keys(data);
+
+    // Create the table HTML
+    const tableHTML = `
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    ${propertyNames.map(propertyName => `<th>${propertyName}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    ${propertyNames.map(propertyName => `<td style="padding: 8px; text-align: center;">${data[propertyName]}</td>`).join('')}
+                </tr>
+            </tbody>
+        </table>
+    `;
+
+    return tableHTML;
+}
     // Call the function to update the label
     updatePoundsOfCO2();
+    displayTable();
   </script>
 
 </body>

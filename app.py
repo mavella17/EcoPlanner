@@ -135,6 +135,24 @@ def poundsCO2():
         flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
     return jsonify({"carbonlbs" : drivelbs + flightlbs})
 
+@app.route('/getFlights')
+def getFlights():
+    with footprintEngine.connect() as connection:
+        query = "SELECT * from flights"
+        df = pd.read_sql(query, con=footprintEngine)
+        results = df.to_dict('records')
+        print(results[0])
+    return jsonify(results[0])
+
+@app.route('/getDrives')
+def getDrives():
+    with footprintEngine.connect() as connection:
+        query = "SELECT * from drives"
+        df = pd.read_sql(query, con=footprintEngine)
+        results = df.to_dict('records')
+        print(results[0])
+    return jsonify(results[0])
+
 @app.route('/results')
 def results():
     return render_template('results.html')

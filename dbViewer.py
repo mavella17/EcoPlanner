@@ -17,6 +17,6 @@ footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 with footprintEngine.connect() as connection:
     query = "SELECT SUM(carbon_lb) from drives"
     drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
-    query = "SELECT SUM(carbon_lb) from flights"
-    flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
-    print("Getting DB: \n --------- \n", drivelbs + flightlbs)
+    query = "SELECT * from flights"
+    flightlbs = connection.execute(db.text(query)).fetchall()
+    print("Getting DB: \n --------- \n", flightlbs)

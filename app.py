@@ -7,7 +7,7 @@ import os
 from key import BKEY
 import sqlalchemy as db
 import pprint
-from sqlalchemy import select
+from sqlalchemy import select, MetaData, Table
 import requests
 from sqlalchemy.sql import text as sa_text
 from forms import driveData, flightData, registrationData
@@ -88,6 +88,25 @@ def get_years():
         query_result = connection.execute(db.text(query)).fetchall()
     return jsonify(options=[(item[0], item[1]) for item in query_result])
 
+@app.route('/clearFlights', methods=['GET'])
+def clearFlights():
+    metadata= MetaData()
+    flights = Table('flights', metadata, autoload_with=footprintEngine)
+    with footprintEngine.begin() as connection:
+        connection.execute(flights.delete())
+    resp = jsonify(success=True)
+    return resp
+
+
+@app.route('/clearDrives', methods=['GET'])
+def clearDrives():
+    metadata= MetaData()
+    drives = Table('drives', metadata, autoload_with=footprintEngine)
+    with footprintEngine.begin() as connection:
+        connection.execute(drives.delete())
+    resp = jsonify(success=True)
+    return resp
+
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
@@ -103,14 +122,14 @@ def lookup():
         if data['type'] == 'vehicle':
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
-            df.to_sql('drives', con=footprintEngine, if_exists='replace', index=True)
+            df.to_sql('drives', con=footprintEngine, if_exists='append', index=True)
         else:
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
             temp = pd.DataFrame(df['legs'][0], index=[0])
             df.drop('legs',axis=1,inplace=True)
             result_df = pd.concat([df,temp],axis = 1)
-            result_df.to_sql('flights', con=footprintEngine, if_exists='replace', index=True)
+            result_df.to_sql('flights', con=footprintEngine, if_exists='append', index=True)
         # query = "SELECT * from drives"
         # with footprintEngine.connect() as connection:
             # query_result = connection.execute(db.text(query)).fetchall()
@@ -131,9 +150,13 @@ def poundsCO2():
     with footprintEngine.connect() as connection:
         query = "SELECT SUM(carbon_lb) from drives"
         drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
+        if not drivelbs:
+            drivelbs = 0
         query = "SELECT SUM(carbon_lb) from flights"
         flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
-    return jsonify({"carbonlbs" : drivelbs + flightlbs})
+        if not flightlbs:
+            flightlbs = 0
+    return jsonify({"flight" : flightlbs, "drive" : drivelbs})
 
 @app.route('/getFlights')
 def getFlights():
@@ -141,8 +164,8 @@ def getFlights():
         query = "SELECT * from flights"
         df = pd.read_sql(query, con=footprintEngine)
         results = df.to_dict('records')
-        print(results[0])
-    return jsonify(results[0])
+        print("FLIGHTS _____", results)
+    return jsonify(results)
 
 @app.route('/getDrives')
 def getDrives():
@@ -150,8 +173,8 @@ def getDrives():
         query = "SELECT * from drives"
         df = pd.read_sql(query, con=footprintEngine)
         results = df.to_dict('records')
-        print(results[0])
-    return jsonify(results[0])
+        print(results)
+    return jsonify(results)
 
 @app.route('/results')
 def results():

@@ -12,13 +12,11 @@ from sqlalchemy.sql import text as sa_text
 #     print("Getting DB: \n --------- \n",pd.DataFrame(query_result))
 #     print([item[0] for item in query_result])
 
-engine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 
 with footprintEngine.connect() as connection:
-    query = "SELECT SUM(carbon_lb) AS sum_value from drives"
-    query_result = connection.execute(db.text(query)).fetchall()
-    driveLBS = float(pd.DataFrame(query_result)['sum_value'])
-    query = "SELECT SUM(carbon_lb) AS sum_value from flights"
-    query_result = connection.execute(db.text(query)).fetchall()
-    flightLBS = float(pd.DataFrame(query_result)['sum_value'])
-    print("Getting DB: \n --------- \n", driveLBS + flightLBS)
+    query = "SELECT SUM(carbon_lb) from drives"
+    drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
+    query = "SELECT SUM(carbon_lb) from flights"
+    flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
+    print("Getting DB: \n --------- \n", drivelbs + flightlbs)

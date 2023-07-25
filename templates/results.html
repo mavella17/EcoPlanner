@@ -99,11 +99,11 @@ function handleMouseLeave() {
 
 
 function updatePoundsOfCO2() {
-        fetch('/poundsCO2') // Replace '123' with the actual user ID or pass it dynamically
+        fetch('/poundsCO2')
             .then(response => response.json())
             .then(data => {
                 const poundsOfCO2Element = document.getElementById('lead');
-                poundsOfCO2Element.textContent = data.carbonlbs/2000;
+                poundsOfCO2Element.textContent = Number(data.carbonlbs/2000).toFixed(2);
                 const tons = document.getElementById('pounds')
                 tons.textContent = data.carbonlbs;
             })

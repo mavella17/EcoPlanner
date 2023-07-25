@@ -129,14 +129,11 @@ def travel():
 @app.route('/poundsCO2')
 def poundsCO2():
     with footprintEngine.connect() as connection:
-        query = "SELECT SUM(carbon_lb) AS sum_value from drives"
-        query_result = connection.execute(db.text(query)).fetchall()
-        driveLBS = float(pd.DataFrame(query_result)['sum_value'])
-        query = "SELECT SUM(carbon_lb) AS sum_value from flights"
-        query_result = connection.execute(db.text(query)).fetchall()
-        flightLBS = float(pd.DataFrame(query_result)['sum_value'])
-        print("Getting DB: \n --------- \n", driveLBS + flightLBS)
-        return jsonify({"carbonlbs" : driveLBS + flightLBS})
+        query = "SELECT SUM(carbon_lb) from drives"
+        drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
+        query = "SELECT SUM(carbon_lb) from flights"
+        flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
+    return jsonify({"carbonlbs" : drivelbs + flightlbs})
 
 @app.route('/results')
 def results():

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 import flask_login
 import flask
-#from key import BKEY
+from key import BKEY
 import sqlalchemy as db
 import pprint
 import sqlite3
@@ -207,30 +207,32 @@ def get_years():
 
 @app.route('/clearFlights', methods=['GET'])
 def clearFlights():
-    metadata= MetaData()
-    flights = Table('flights', metadata, autoload_with=footprintEngine)
-    with footprintEngine.begin() as connection:
-        connection.execute(flights.delete())
-    resp = jsonify(success=True)
-    return resp
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        query = "DELETE FROM flights WHERE user_id = '" + user_id + "';"
+        with footprintEngine.begin() as connection:
+            connection.execute(db.text(query))
+        resp = jsonify(success=True)
+        return resp
+    return jsonify({"message": "Authentication required."}), 401
 
 
 @app.route('/clearDrives', methods=['GET'])
 def clearDrives():
-    metadata= MetaData()
-    drives = Table('drives', metadata, autoload_with=footprintEngine)
-    with footprintEngine.begin() as connection:
-        connection.execute(drives.delete())
-    resp = jsonify(success=True)
-    return resp
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        query = "DELETE FROM drives WHERE user_id = '" + user_id + "';"
+        with footprintEngine.begin() as connection:
+            connection.execute(db.text(query))
+        resp = jsonify(success=True)
+        return resp
+    return jsonify({"message": "Authentication required."}), 401
 
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
-    API_KEY = 'UeGSxzCjymyaVVhbNlZYkQ'
-
     headers = {
-        'Authorization': 'Bearer ' + API_KEY,
+        'Authorization': 'Bearer ' + BKEY,
         'Content-Type': 'application/json'
     }
     api = 'https://www.carboninterface.com/api/v1/estimates'
@@ -239,10 +241,10 @@ def lookup():
     if req.status_code >= 200 and req.status_code < 300:
         if data['type'] == 'vehicle':
             row = req.json()['data']['attributes']
-            df = pd.DataFrame(row, index=[0])
-            user_id = session.get('user_id')  
-            if user_id:
-                df['user_id'] = user_id  
+            df = pd.DataFrame(row, index=[0]) 
+            if flask_login.current_user.is_authenticated:
+                df['user_id'] = flask_login.current_user.id 
+                
                 df.to_sql('drives', con=footprintEngine, if_exists='append', index=True)
         else:
             row = req.json()['data']['attributes']
@@ -250,9 +252,9 @@ def lookup():
             temp = pd.DataFrame(df['legs'][0], index=[0])
             df.drop('legs', axis=1, inplace=True)
             result_df = pd.concat([df, temp], axis=1)
-            user_id = session.get('user_id')  
-            if user_id:
-                result_df['user_id'] = user_id  
+            if flask_login.current_user.is_authenticated:
+                result_df['user_id'] = flask_login.current_user.id  
+                print("","","","REACHED FLIGHT","","")
                 result_df.to_sql('flights', con=footprintEngine, if_exists='append', index=True)
 
     return jsonify(req.json())
@@ -265,60 +267,67 @@ def travel():
 
 @app.route('/poundsCO2')
 def poundsCO2():
-    with footprintEngine.connect() as connection:
-        query = "SELECT SUM(carbon_lb) from drives"
-        drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
-        if not drivelbs:
-            drivelbs = 0
-        query = "SELECT SUM(carbon_lb) from flights"
-        flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
-        if not flightlbs:
-            flightlbs = 0
-    return jsonify({"flight" : flightlbs, "drive" : drivelbs})
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT SUM(carbon_lb) from drives where user_id = '" + user_id +"';"
+            drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
+            if not drivelbs:
+                drivelbs = 0
+            query = "SELECT SUM(carbon_lb) from flights where user_id = '" + user_id +"';"
+            flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
+            if not flightlbs:
+                flightlbs = 0
+        return jsonify({"flight" : flightlbs, "drive" : drivelbs})
+    return jsonify({"flight" : 0, "drive" : 0})
 
 
 @app.route('/getFlights')
 def getFlights():
-    user_id = session.get('user_id')
-    if user_id is None:
-        return jsonify([])
-    with footprintEngine.connect() as connection:
-        query = "SELECT * from flights WHERE user_id = :user_id"
-        df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
-        results = df.to_dict('records')
-        print("FLIGHTS _____", results)
-    for record in results:
-        if 'index' in record:
-            del record['index']
-        if 'carbon_g' in record:
-            del record['carbon_g']
-        if 'carbon_kg' in record:
-            del record['carbon_kg']
-    return jsonify(results)
+
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT * from flights WHERE user_id = :user_id"
+            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
+            results = df.to_dict('records')
+            print("FLIGHTS _____", results)
+            for record in results:
+                record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+                if 'index' in record:
+                    del record['index']
+                if 'carbon_g' in record:
+                    del record['carbon_g']
+                if 'carbon_kg' in record:
+                    del record['carbon_kg']
+        return jsonify(results)
+    
+    return jsonify([])
+    
 
 
 @app.route('/getDrives')
 def getDrives():
-    user_id = session.get('user_id')  
-    if user_id is None:
-        return jsonify([])  
-
-    with footprintEngine.connect() as connection:
-        query = "SELECT * from drives WHERE user_id = :user_id" 
-        df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT * from drives WHERE user_id = :user_id"
+            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
         results = df.to_dict('records')
-
-    for record in results:
-        if 'index' in record:
-            del record['index']
-        if 'carbon_g' in record:
-            del record['carbon_g']
-        if 'carbon_kg' in record:
-            del record['carbon_kg']
-        if 'vehicle_model_id' in record:
-            del record['vehicle_model_id']
-
-    return jsonify(results)
+        print("FLIGHTS _____", results)
+        for record in results:
+            record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+            if 'index' in record:
+                del record['index']
+            if 'carbon_g' in record:
+                del record['carbon_g']
+            if 'carbon_kg' in record:
+                del record['carbon_kg']
+            if 'vehicle_model_id' in record:
+                del record['vehicle_model_id']
+        return jsonify(results)
+    else:
+        return jsonify([])
 
 
 @app.route('/results')

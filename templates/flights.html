@@ -25,10 +25,72 @@
   </ul>
 </header>
 
+<br><br>
+<!-- code for the flight info display -->
+<div class="row">
+    <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+        <div class="main left down">
+            <div class="main-inner" id="panel">
+                <div class="main-box" id="panel-container">
+                    <div class="img">
+                        <img src="./static/img/plane.png" alt="plane logo">
+                    </div>
+                    <!-- flight information on the card -->
+                    <div class="text center">
+                        <h2 class="fw-bold subtitle" id="lead" style="margin-top: -5%; margin-bottom:10%; font-size:60px;"><span class="starting_air">•••</span> ➔ <span class="ending_air">•••</span></h2>
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <h6 class="fw-strong">Passengers</h6>
+                            </div>
+
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <h6 class="fw-strong">Flight</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <p ><span class="passengers">0</span></p>
+                            </div>
+
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <p>AB001</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <h6 class="fw-strong">Seat Number</h6>
+                            </div>
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <h6 class="fw-strong">Gate</h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <p >26D</p>
+                            </div>
+                            <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+                                <p>C06</p>
+                            </div>
+                        </div>
+                        <img src="./static/img/barcode.png" alt="barcode" width="330px" height="150px" style="margin:-30px;">
+                        <br>
+                        <p><i>Disclaimer: This boarding pass is simulated and does not reflect real flight details. (ie. gate, flight number)</i></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--  The form part  -->
+    <div class="col-sm-6 mb-3 mb-sm-0 text-center">
+
 {% block content %}
 <div class="form-holder">
+
     <h3>Calculating Flight Emissions</h3>
-        <p>Enter your flight information to calculate carbon emissions.</p>
+    <p>Enter your flight information to calculate carbon emissions.</p>
+
     <div class="flight-content">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
@@ -44,7 +106,7 @@
                 {% endfor %}
                 </div>
                 {% else %}
-                    {{ form.wherefrom(class="form-control form-control-default form-flight", style='width:50%', placeholder="Origin") }}
+                    {{ form.wherefrom(class="form-control form-control-default form-flight start-airport", style='width:50%', placeholder="Origin") }}
                 {% endif %}
             <!-- adding arrows-->
             <div class="arrows" style="float:left">
@@ -61,7 +123,7 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.whereto(class="form-control form-control-default form-flight", style='width:50%', placeholder="Destination") }}
+                {{ form.whereto(class="form-control form-control-default form-flight destination-airport", style='width:50%', placeholder="Destination") }}
             {% endif %}
         </div>
         <div class="col-md-12 form-passengers">
@@ -74,7 +136,7 @@
             {% endfor %}
             </div>
             {% else %}
-                {{ form.passengers(class="form-control form-control-default", style='width:33%', placeholder="Passengers") }}
+                {{ form.passengers(class="form-control form-control-default pass_num ", style='width:33%', placeholder="Passengers") }}
             {% endif %}
         </div>
             
@@ -86,9 +148,10 @@
         </fieldset>
         </form>
     </div>
-    
-    
 </div>
+    </div>
+</div>
+
 
 
 {% endblock content %}
@@ -138,5 +201,65 @@
             });
         });
     });
+
+
+    // javascript for card element
+    
+    let myPanel = document.getElementById("panel");
+    let subpanel = document.getElementById("panel-container");
+    
+    myPanel.onmousemove = transformPanel;
+    myPanel.onmouseenter = handleMouseEnter;
+    myPanel.onmouseleave = handleMouseLeave;
+    
+    let mouseX, mouseY;
+    
+    let transformAmount = 5;
+    
+    function transformPanel(mouseEvent) {
+        mouseX = mouseEvent.pageX;
+        mouseY = mouseEvent.pageY;
+    
+        const centerX = myPanel.offsetLeft + myPanel.clientWidth / 2;
+        const centerY = myPanel.offsetTop + myPanel.clientHeight / 2;
+    
+        const percentX = (mouseX - centerX) / (myPanel.clientWidth / 2);
+        const percentY = -((mouseY - centerY) / (myPanel.clientHeight / 2));
+    
+        subpanel.style.transform = "perspective(400px) rotateY(" + percentX * transformAmount + "deg) rotateX(" + percentY * transformAmount + "deg)";
+    }
+    
+    function handleMouseEnter() {
+        setTimeout(() => {
+            subpanel.style.transition = "";
+        }, 100);
+        subpanel.style.transition = "transform 0.8s";
+    }
+    
+    function handleMouseLeave() {
+        subpanel.style.transition = "transform 0.8s";
+        setTimeout(() => {
+            subpanel.style.transition = "";
+        }, 100);
+    
+        subpanel.style.transform = "perspective(400px) rotateY(0deg) rotateX(0deg)";
+    }
+
+
+
+    // script for the form user input thing
+    document.querySelector(".start-airport").oninput = () => {
+      document.querySelector(".starting_air").innerText = document.querySelector('.start-airport').value;
+    }
+
+   document.querySelector(".destination-airport").oninput = () => {
+      document.querySelector(".ending_air").innerText = document.querySelector('.destination-airport').value;
+    }
+
+    document.querySelector(".pass_num").oninput = () => {
+      document.querySelector(".passengers").innerText = document.querySelector('.pass_num').value;
+    }
+
+
 </script>
 </html>

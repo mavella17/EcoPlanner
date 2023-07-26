@@ -4,15 +4,18 @@ from flask import url_for, flash, redirect, request, session
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import flask_login
+import flask
 from key import BKEY
 import sqlalchemy as db
 import pprint
+import sqlite3
+import random
 from sqlalchemy import select, MetaData, Table
 import requests
 from sqlalchemy.sql import text as sa_text
-from forms import driveData, flightData, registrationData
+from forms import driveData, flightData, registrationData, loginData
 from flask_behind_proxy import FlaskBehindProxy
-from users_db import users, add_users, display
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
@@ -20,9 +23,85 @@ load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+# users = {'admin@gmail.com': {'password': 'pass'}}
+
+conn = sqlite3.connect('users.db')
+cursor = conn.cursor()
+cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL
+                )''')
+conn.commit()
 
 
-@app.route("/")
+def register_user(email, password):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user_exist = cursor.fetchone()
+
+    if user_exist:
+        print("account already exist")
+    else:
+        user_id = random.randint(1, 1000)
+        insert = "INSERT INTO users (user_id, email, password) VALUES (?, ?, ?)"
+
+        cursor.execute(insert, (user_id, email, password))
+        conn.commit()
+        print(f"New user with ID {user_id} has been created.")
+
+        conn.close()
+
+
+def display():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    print('Display: ')
+    for row in rows:
+        print(row)
+    conn.close()
+
+
+class User(flask_login.UserMixin):
+    pass
+
+@login_manager.user_loader
+def user_loader(email):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user:
+        user_obj = User()
+        user_obj.id = email
+        return user_obj
+
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+    if not email:
+        return None
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user_data = cursor.fetchone()
+    conn.close()
+
+    if user_data:
+        user = User()
+        user.id = user_data[1]  
+        return user
+
+    return None
+    
 @app.route("/home")
 def home():
     return render_template('home.html', subtitle='Home Page',
@@ -59,14 +138,51 @@ def flight_data():
 
 @app.route("/register", methods=['GET', 'POST'])
 def registration_Data():
-    form = registrationData()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        # add_users(username, password)
-        flash(f'Account created for {form.username.data}', 'success!')
-        return redirect(url_for('home'))
-    return render_template('register.html', title='Register', form=form)
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        register_user(email, password)
+        flash(f'Account created for {email}', 'success!')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
+
+
+
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html', title='Login')
+
+    email = request.form['email']
+    password = request.form['password']
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+
+    if user and password == user[2]: 
+        user_obj = User()
+        user_obj.id = email
+        flask_login.login_user(user_obj)
+        flash(f'Logged in successfully as {email}', 'success!')
+        return redirect(url_for('protected'))
+
+    flash('Error: Invalid email or password.', 'danger')
+    return redirect(url_for('login'))
+
+@app.route('/protected')
+@flask_login.login_required
+def protected():
+    return 'Logged in as: ' + flask_login.current_user.id
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    flask_login.logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route('/get_models', methods=['POST'])
@@ -91,48 +207,56 @@ def get_years():
 
 @app.route('/clearFlights', methods=['GET'])
 def clearFlights():
-    metadata = MetaData()
-    flights = Table('flights', metadata, autoload_with=footprintEngine)
-    with footprintEngine.begin() as connection:
-        connection.execute(flights.delete())
-    resp = jsonify(success=True)
-    return resp
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        query = "DELETE FROM flights WHERE user_id = '" + user_id + "';"
+        with footprintEngine.begin() as connection:
+            connection.execute(db.text(query))
+        resp = jsonify(success=True)
+        return resp
+    return jsonify({"message": "Authentication required."}), 401
 
 
 @app.route('/clearDrives', methods=['GET'])
 def clearDrives():
-    metadata = MetaData()
-    drives = Table('drives', metadata, autoload_with=footprintEngine)
-    with footprintEngine.begin() as connection:
-        connection.execute(drives.delete())
-    resp = jsonify(success=True)
-    return resp
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        query = "DELETE FROM drives WHERE user_id = '" + user_id + "';"
+        with footprintEngine.begin() as connection:
+            connection.execute(db.text(query))
+        resp = jsonify(success=True)
+        return resp
+    return jsonify({"message": "Authentication required."}), 401
 
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
-    bkey = BKEY
     headers = {
-                'Authorization': 'Bearer ' + bkey,
-                'Content-Type': 'application/json'
-            }
+        'Authorization': 'Bearer ' + BKEY,
+        'Content-Type': 'application/json'
+    }
     api = 'https://www.carboninterface.com/api/v1/estimates'
     data = request.get_json()
     req = requests.post(api, headers=headers, json=data)
     if req.status_code >= 200 and req.status_code < 300:
         if data['type'] == 'vehicle':
             row = req.json()['data']['attributes']
-            df = pd.DataFrame(row, index=[0])
-            df.to_sql('drives', con=footprintEngine,
-                      if_exists='append', index=True)
+            df = pd.DataFrame(row, index=[0]) 
+            if flask_login.current_user.is_authenticated:
+                df['user_id'] = flask_login.current_user.id 
+                
+                df.to_sql('drives', con=footprintEngine, if_exists='append', index=True)
         else:
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
             temp = pd.DataFrame(df['legs'][0], index=[0])
             df.drop('legs', axis=1, inplace=True)
             result_df = pd.concat([df, temp], axis=1)
-            result_df.to_sql('flights', con=footprintEngine,
-                             if_exists='append', index=True)
+            if flask_login.current_user.is_authenticated:
+                result_df['user_id'] = flask_login.current_user.id  
+                print("","","","REACHED FLIGHT","","")
+                result_df.to_sql('flights', con=footprintEngine, if_exists='append', index=True)
+
     return jsonify(req.json())
 
 
@@ -143,51 +267,67 @@ def travel():
 
 @app.route('/poundsCO2')
 def poundsCO2():
-    with footprintEngine.connect() as connection:
-        query = "SELECT SUM(carbon_lb) from drives"
-        drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
-        if not drivelbs:
-            drivelbs = 0
-        query = "SELECT SUM(carbon_lb) from flights"
-        flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
-        if not flightlbs:
-            flightlbs = 0
-    return jsonify({"flight": flightlbs, "drive": drivelbs})
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT SUM(carbon_lb) from drives where user_id = '" + user_id +"';"
+            drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
+            if not drivelbs:
+                drivelbs = 0
+            query = "SELECT SUM(carbon_lb) from flights where user_id = '" + user_id +"';"
+            flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
+            if not flightlbs:
+                flightlbs = 0
+        return jsonify({"flight" : flightlbs, "drive" : drivelbs})
+    return jsonify({"flight" : 0, "drive" : 0})
 
 
 @app.route('/getFlights')
 def getFlights():
-    with footprintEngine.connect() as connection:
-        query = "SELECT * from flights"
-        df = pd.read_sql(query, con=footprintEngine)
-        results = df.to_dict('records')
-        print("FLIGHTS _____", results)
-    for record in results:
-        if 'index' in record:
-            del record['index']
-        if 'carbon_g' in record:
-            del record['carbon_g']
-        if 'carbon_kg' in record:
-            del record['carbon_kg']
-    return jsonify(results)
+
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT * from flights WHERE user_id = :user_id"
+            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
+            results = df.to_dict('records')
+            print("FLIGHTS _____", results)
+            for record in results:
+                record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+                if 'index' in record:
+                    del record['index']
+                if 'carbon_g' in record:
+                    del record['carbon_g']
+                if 'carbon_kg' in record:
+                    del record['carbon_kg']
+        return jsonify(results)
+    
+    return jsonify([])
+    
 
 
 @app.route('/getDrives')
 def getDrives():
-    with footprintEngine.connect() as connection:
-        query = "SELECT * from drives"
-        df = pd.read_sql(query, con=footprintEngine)
+    if flask_login.current_user.is_authenticated:
+        user_id = flask_login.current_user.id 
+        with footprintEngine.connect() as connection:
+            query = "SELECT * from drives WHERE user_id = :user_id"
+            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
         results = df.to_dict('records')
-    for record in results:
-        if 'index' in record:
-            del record['index']
-        if 'carbon_g' in record:
-            del record['carbon_g']
-        if 'carbon_kg' in record:
-            del record['carbon_kg']
-        if 'vehicle_model_id' in record:
-            del record['vehicle_model_id']
-    return jsonify(results)
+        print("FLIGHTS _____", results)
+        for record in results:
+            record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+            if 'index' in record:
+                del record['index']
+            if 'carbon_g' in record:
+                del record['carbon_g']
+            if 'carbon_kg' in record:
+                del record['carbon_kg']
+            if 'vehicle_model_id' in record:
+                del record['vehicle_model_id']
+        return jsonify(results)
+    else:
+        return jsonify([])
 
 
 @app.route('/results')

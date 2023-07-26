@@ -10,8 +10,7 @@ class driveData(FlaskForm):
     vehiclemodel = StringField('Vehicle Model', validators=[InputRequired()])
     # TODO: add a feature where distance can be change from miles to kilometers
 
-    distance = IntegerField('Distance', validators=[DataRequired(),
-                            NumberRange(min=1)])
+    distance = IntegerField('Distance', validators=[DataRequired(),NumberRange(min=1)])
     distance_type = SelectField('Miles or Kilometers',
                                 choices=[('mi', 'Miles'),
                                          ('km', 'Kilometers')])
@@ -31,8 +30,8 @@ class flightData(FlaskForm):
     whereto = StringField('Destination: ',
                           validators=[DataRequired(), Length(min=3, max=3),
                                       validate_code])
-    passengers = IntegerField('Passengers:', validators=[DataRequired(),
-                              NumberRange(min=1, max=20)])
+    passengers = IntegerField('Passengers:',
+                          validators=[DataRequired(),NumberRange(min=1, max=20)])
     submit = SubmitField('Calculate Emissions')
 
 
@@ -41,5 +40,13 @@ class registrationData(FlaskForm):
     username = StringField('Username:',
                            validators=[DataRequired(), Length(min=2, max=20)])
     password = PasswordField('Password:',
-                             validators=[DataRequired()])
+                           validators=[DataRequired()])
     submit = SubmitField('Sign Up!')
+
+
+class loginData(FlaskForm):
+    username = StringField('Username:',
+                           validators=[DataRequired(), Length(min=2, max=20)])
+    password = PasswordField('Password:',
+                           validators=[DataRequired()])
+    submit = SubmitField('Login!')      

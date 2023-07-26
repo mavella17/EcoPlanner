@@ -2,6 +2,7 @@
 body {
   background-image: url("img/mesh2.png");
   background-repeat: no-repeat;
+  background-size: cover;
 }
 
 h3, p{

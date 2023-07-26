@@ -29,38 +29,19 @@
         <p>Log in to your EcoPlanner account!</p>
         <div class="login-content">
             <form method="POST" action="{{ url_for('login') }}">
-                {{ form.hidden_tag() }}
                 <fieldset class="form-content">
                     <div class="form-group">
                         <div class="username">
-                            {{ form.username.label(class="form-control-label") }}
-                            {% if form.username.errors %}
-                                {{ form.username(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.username.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.username(class="form-control form-control-lg") }}
-                            {% endif %}
+                            <label class="form-control-label">Email</label>
+                            <input type="text" name="email" id="email" placeholder="email" class="form-control form-control-lg">
                         </div>
                         <div class="password">
-                            {{ form.password.label(class="form-control-label") }}
-                            {% if form.password.errors %}
-                                {{ form.password(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.password.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.password(class="form-control form-control-lg") }}
-                            {% endif %}
+                            <label class="form-control-label">Password</label>
+                            <input type="password" name="password" id="password" placeholder="password" class="form-control form-control-lg">
                         </div>
                     </div>
                     <div class="submit-btn">
-                        {{ form.submit(class="btn btn-dark btn-default gradient") }}
+                        <input type="submit" name="submit" class="btn btn-dark btn-default gradient">
                     </div>
                 </fieldset>
             </form>

@@ -179,7 +179,7 @@ def protected():
     return 'Logged in as: ' + flask_login.current_user.id
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
     flask_login.logout_user()
     return redirect(url_for('login'))

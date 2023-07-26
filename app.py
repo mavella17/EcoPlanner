@@ -4,6 +4,8 @@ from flask import url_for, flash, redirect, request, session
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import flask_login
+import flask
 #from key import BKEY
 import sqlalchemy as db
 import pprint
@@ -20,9 +22,34 @@ load_dotenv()
 app.config['SECRET_KEY'] = 'c275b91d07ca2bdd6359'
 engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+users = {'admin@gmail.com': {'password': 'pass'}}
 
 
-@app.route("/")
+class User(flask_login.UserMixin):
+    pass
+
+@login_manager.user_loader
+def user_loader(email):
+    if email not in users:
+        return
+
+    user = User()
+    user.id = email
+    return user
+
+
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+    if email not in users:
+        return
+
+    user = User()
+    user.id = email
+    return user
+
 @app.route("/home")
 def home():
     return render_template('home.html', subtitle='Home Page',
@@ -71,30 +98,37 @@ def registration_Data():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route("/login", methods=['GET', 'POST'])
+
+
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = loginData()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        
-        user_id = check_user_password(username, password)
-        if user_id:
-            session['user_id'] = user_id
-            flash(f'Logged in successfully as {username}', 'success!')
-            return redirect(url_for('home'))
-        else:
-            flash('Error: Invalid username or password.', 'danger')
+    if request.method == 'GET':
+        return render_template('login.html', title='Login')
 
-    return render_template('login.html', title='Login', form=form)
+    email = request.form['email']
+    password = request.form['password']
+    if email in users and flask.request.form['password'] == users[email]['password']:
+        user = User()
+        user.id = email
+        flask_login.login_user(user)
+        flash(f'Logged in successfully as {email}', 'success!')
+        return redirect(url_for('protected'))
+
+    flash('Error: Invalid email or password.', 'danger')
+    return redirect(url_for('login'))
 
 
-@app.route('/logout', methods=['GET', 'POST'])
+@app.route('/protected')
+@flask_login.login_required
+def protected():
+    return 'Logged in as: ' + flask_login.current_user.id
+
+
+@app.route('/logout')
 def logout():
-    if request.method == 'POST':
-        session.pop('user_id', None)
-        flash('You have been logged out.', 'success')
-    return redirect(url_for('home'))
+    flask_login.logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route('/get_models', methods=['POST'])
@@ -237,6 +271,10 @@ def getDrives():
 def results():
     return render_template('results.html')
 
+
+if __name__ == '__main__':
+    # display()
+    app.run(debug=True, host="0.0.0.0")
 
 if __name__ == '__main__':
     # display()

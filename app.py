@@ -9,12 +9,13 @@ import flask
 #from key import BKEY
 import sqlalchemy as db
 import pprint
+import sqlite3
+import random
 from sqlalchemy import select, MetaData, Table
 import requests
 from sqlalchemy.sql import text as sa_text
 from forms import driveData, flightData, registrationData, loginData
 from flask_behind_proxy import FlaskBehindProxy
-from users_db import create_table, add_users, display, check_user_password
 
 app = Flask(__name__)
 proxied = FlaskBehindProxy(app)
@@ -24,7 +25,46 @@ engine = db.create_engine('sqlite:///EcoPlanner/vehicles.db')
 footprintEngine = db.create_engine('sqlite:///EcoPlanner/carbon_footprint.db')
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-users = {'admin@gmail.com': {'password': 'pass'}}
+# users = {'admin@gmail.com': {'password': 'pass'}}
+
+conn = sqlite3.connect('users.db')
+cursor = conn.cursor()
+cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL
+                )''')
+conn.commit()
+
+
+def register_user(email, password):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user_exist = cursor.fetchone()
+
+    if user_exist:
+        print("account already exist")
+    else:
+        user_id = random.randint(1, 1000)
+        insert = "INSERT INTO users (user_id, email, password) VALUES (?, ?, ?)"
+
+        cursor.execute(insert, (user_id, email, password))
+        conn.commit()
+        print(f"New user with ID {user_id} has been created.")
+
+        conn.close()
+
+
+def display():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    print('Display: ')
+    for row in rows:
+        print(row)
+    conn.close()
 
 
 class User(flask_login.UserMixin):
@@ -32,24 +72,36 @@ class User(flask_login.UserMixin):
 
 @login_manager.user_loader
 def user_loader(email):
-    if email not in users:
-        return
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
 
-    user = User()
-    user.id = email
-    return user
-
+    if user:
+        user_obj = User()
+        user_obj.id = email
+        return user_obj
 
 @login_manager.request_loader
 def request_loader(request):
     email = request.form.get('email')
-    if email not in users:
-        return
+    if not email:
+        return None
 
-    user = User()
-    user.id = email
-    return user
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user_data = cursor.fetchone()
+    conn.close()
 
+    if user_data:
+        user = User()
+        user.id = user_data[1]  
+        return user
+
+    return None
+    
 @app.route("/home")
 def home():
     return render_template('home.html', subtitle='Home Page',
@@ -86,16 +138,13 @@ def flight_data():
 
 @app.route("/register", methods=['GET', 'POST'])
 def registration_Data():
-    form = registrationData()
-    if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        user_id = add_users(username, password)
-        if user_id:
-            flash(f'Account created for {form.username.data}', 'success!')
-            session['user_id'] = user_id
-            return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        register_user(email, password)
+        flash(f'Account created for {email}', 'success!')
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
 
 
@@ -108,16 +157,21 @@ def login():
 
     email = request.form['email']
     password = request.form['password']
-    if email in users and flask.request.form['password'] == users[email]['password']:
-        user = User()
-        user.id = email
-        flask_login.login_user(user)
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+
+    if user and password == user[2]: 
+        user_obj = User()
+        user_obj.id = email
+        flask_login.login_user(user_obj)
         flash(f'Logged in successfully as {email}', 'success!')
         return redirect(url_for('protected'))
 
     flash('Error: Invalid email or password.', 'danger')
     return redirect(url_for('login'))
-
 
 @app.route('/protected')
 @flask_login.login_required
@@ -273,9 +327,5 @@ def results():
 
 
 if __name__ == '__main__':
-    # display()
-    app.run(debug=True, host="0.0.0.0")
-
-if __name__ == '__main__':
-    # display()
+    display()
     app.run(debug=True, host="0.0.0.0")

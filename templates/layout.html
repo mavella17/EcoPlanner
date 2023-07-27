@@ -21,34 +21,13 @@
     <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
     <li><a href="{{ url_for('travel')}}">Travel</a></li>
     <li><a href="{{ url_for('results') }}">Results</a></li>
-    <li id = "login/logout"><a href="{{ url_for('login') }}">Login</a></li>
-    <li id="currUser"><li>
+    <li id ="log"><a href="{{ url_for('login') }}">Log In/Sign-Up</a></li>
+    <li id = "currUser"></li>
   </ul>
 </header>
 
 <!-- code for the heading and earth spin -->
-<div id="earth">
-  <div class="header">
-    <h2 class="fw-bold title" >EcoPlanner</h2>
-    <br>
-    <h4 class="fw-semibold subtitle "> <span class="auto-type"></span>  travel planning</h4>
-    <br>
-    <button type="button" class="btn btn-dark btn-lg gradient" onclick="window.location.href='{{ url_for('travel')}}';" >Get Started </button>
-  </div>
-
-  <br><br><br><br><br><br><br><br>
-
-
-  <!-- code for the auto typing -->
-  <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
-
-  <script>
-    var typed = new Typed(".auto-type", {
-      strings: ["Sustainable", "Eco-conscious", "Eco-friendly"],
-      typeSpeed: 100,
-      backSpeed: 90,
-      loop: true
-    })
+<script>
 
   function checkLoginStatus() {
     fetch('/check_login_status', {
@@ -57,19 +36,28 @@
     })
     .then(response => response.json())
     .then(data => {
+      console.log(data)
+      const currUserElement = document.getElementById('currUser');
+      const log = document.getElementById('log');
       if (data.status === "logged_in") {
         // User is logged in
-        console.log("User is logged in with id:", data.user_id);
+        currUserElement.textContent = data.user;
+        log.textContent = "Logout"
+        console.log("User is logged in with id:", data.user);
       } else {
         // User is not logged in
       console.log("User is not logged in.");
+      log.textContent = "Log In/Sign Up"
+      currUserElement.textContent = "";
+
       }
     })
   .catch(error => {
     console.error('Error:', error);
   });
+  }
   checkLoginStatus();
-}
+
   </script>
 
   <!-- feedback warnings -->

@@ -1,3 +1,5 @@
+{% extends "layout.html" %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,17 +11,7 @@
 </head>
 
 <body style="padding: 10%;">
-<!-- navbar  -->
-<header>
-    <a href="{{ url_for('home')}}" class="logo hello">EcoPlanner</a>
-    <ul class="navigation">
-        <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
-        <li><a href="{{ url_for('travel')}}">Travel</a></li>
-        <li><a href="{{ url_for('results') }}">Results</a></li>
-        <li><a href="{{ url_for('registration_Data') }}">Login</a></li>
-        <li><a href="{{ url_for('logout') }}">Logout </a></li>
-    </ul>
-</header>
+
 
 <br><br><br>
 
@@ -231,3 +223,4 @@ function createTableFromJSON(jsonString) {
 
 </body>
 </html>
+{% endblock content %}

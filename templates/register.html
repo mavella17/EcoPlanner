@@ -1,3 +1,5 @@
+{% extends "layout.html" %}
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,18 +14,8 @@
 
 <body>
 
-<!-- Navbar -->
-<header>
-    <a href="#" class="logo">EcoPlanner</a>
-    <ul class="navigation">
-        <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
-        <li><a href="{{ url_for('travel')}}">Travel</a></li>
-        <li><a href="{{ url_for('registration_Data') }}">Sign Up</a></li>
-        <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
-    </ul>
-</header>
 
-{% block content %}
+
     <div class="form-holder">
         <h3>Sign Up</h3>
         <p>Sign up to save results from EcoPlanner!</p>
@@ -47,7 +39,7 @@
 </form>
         </div>
     </div>
-{% endblock content %}
 
 </body>
 </html>
+{% endblock content %}

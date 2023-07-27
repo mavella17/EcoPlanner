@@ -1,3 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
+<div id="earth">
+  <div class="header">
+    <h2 class="fw-bold title" >EcoPlanner</h2>
+    <br>
+    <h4 class="fw-semibold subtitle "> <span class="auto-type"></span>  travel planning</h4>
+    <br>
+    <button type="button" class="btn btn-dark btn-lg gradient" onclick="window.location.href='{{ url_for('travel')}}';" >Get Started </button>
+  </div>
+
+  <br><br><br><br><br><br><br><br>
+
+
+  <!-- code for the auto typing -->
+  <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+
+  <script>
+    var typed = new Typed(".auto-type", {
+      strings: ["Sustainable", "Eco-conscious", "Eco-friendly"],
+      typeSpeed: 100,
+      backSpeed: 90,
+      loop: true
+    });
+    </script>
 {% endblock content %}

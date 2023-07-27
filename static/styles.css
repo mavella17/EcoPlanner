@@ -85,6 +85,10 @@ span {
   color: green;
 }
 
+span .cursor{
+  color: black;
+}
+
 .auto-type {
   background: linear-gradient(to right,
             #4242bd ,teal, lime, darkgreen);

@@ -18,11 +18,11 @@
   <a href="{{ url_for('home')}}" class="logo hello">EcoPlanner</a>
   <ul class="navigation">
     <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
+    <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
     <li><a href="{{ url_for('travel')}}">Travel</a></li>
     <li><a href="{{ url_for('results') }}">Results</a></li>
-    <li><a href="{{ url_for('registration_Data') }}">Login</a></li>
-    <li><a href="{{ url_for('logout') }}">Logout </a></li>
-    <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
+    <li id = "login/logout"><a href="{{ url_for('login') }}">Login</a></li>
+    <li id="currUser"><li>
   </ul>
 </header>
 
@@ -49,6 +49,27 @@
       backSpeed: 90,
       loop: true
     })
+
+  function checkLoginStatus() {
+    fetch('/check_login_status', {
+      method: 'GET',
+      credentials: 'include', // Include cookies for authentication if necessary
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "logged_in") {
+        // User is logged in
+        console.log("User is logged in with id:", data.user_id);
+      } else {
+        // User is not logged in
+      console.log("User is not logged in.");
+      }
+    })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+  checkLoginStatus();
+}
   </script>
 
   <!-- feedback warnings -->

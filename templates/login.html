@@ -17,6 +17,7 @@
 
 
     <div class="form-holder">
+        <br><br><br>
         <h3>Login</h3>
         <p>Log in to your EcoPlanner account!</p>
         <div class="login-content">
@@ -32,9 +33,12 @@
                             <input type="password" name="password" id="password" placeholder="password" class="form-control form-control-lg">
                         </div>
                     </div>
+                    <br><br>
                     <div class="submit-btn">
                         <input type="submit" name="submit" class="btn btn-dark btn-default gradient">
                     </div>
+                    <br>
+                   <a style="color:black;" href="{{ url_for('registration_Data') }}"> <p style="color:black;">Click here if you need to sign up.</p></a>
                 </fieldset>
             </form>
         </div>

@@ -178,6 +178,12 @@ def login():
 def protected():
     return 'Logged in as: ' + flask_login.current_user.id
 
+@app.route("/check_login_status")
+def check_login_status():
+    if flask_login.current_user.is_authenticated:
+        return jsonify({"status": "logged_in", "user": flask_login.current_user.email})
+    else:
+        return jsonify({"status": "not_logged_in"})
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():

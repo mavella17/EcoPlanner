@@ -11,20 +11,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
-<body>
 
-<!-- navbar  -->
-<header>
-  <a href="{{ url_for('home')}}" class="logo hello">EcoPlanner</a>
-  <ul class="navigation">
-    <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
-    <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
-    <li><a href="{{ url_for('travel')}}">Travel</a></li>
-    <li><a href="{{ url_for('results') }}">Results</a></li>
-    <li id ="log"><a href="{{ url_for('login') }}">Log In/Sign-Up</a></li>
-    <li id = "currUser"></li>
-  </ul>
-</header>
 
 <!-- code for the heading and earth spin -->
 <script>
@@ -37,18 +24,20 @@
     .then(response => response.json())
     .then(data => {
       console.log(data)
-      const currUserElement = document.getElementById('currUser');
       const log = document.getElementById('log');
+      const logAnchor = document.createElement('a');
       if (data.status === "logged_in") {
         // User is logged in
-        currUserElement.textContent = data.user;
-        log.textContent = "Logout"
+        logAnchor.textContent = "Logout: " + data.user;
+        logAnchor.href="{{url_for('logout')}}"
         console.log("User is logged in with id:", data.user);
+        log.appendChild(logAnchor);
       } else {
         // User is not logged in
       console.log("User is not logged in.");
-      log.textContent = "Log In/Sign Up"
-      currUserElement.textContent = "";
+      logAnchor.href = "{{url_for('login')}}"
+      logAnchor.textContent = "Log In/Sign Up";
+      log.appendChild(logAnchor);
 
       }
     })
@@ -59,6 +48,20 @@
   checkLoginStatus();
 
   </script>
+  <body>
+<!-- navbar  -->
+<header>
+  <a href="{{ url_for('home')}}" class="logo hello">EcoPlanner</a>
+  <ul class="navigation">
+    <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
+    <li><a href="https://github.com/mavella17/EcoPlanner">Github </a></li>
+    <li><a href="{{ url_for('travel')}}">Travel</a></li>
+    <li><a href="{{ url_for('results') }}">Results</a></li>
+    <li id ="log"></li>
+  </ul>
+</header>
+
+
 
   <!-- feedback warnings -->
   {% with messages = get_flashed_messages(with_categories=true) %}

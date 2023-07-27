@@ -168,7 +168,7 @@ def login():
         user_obj.id = email
         flask_login.login_user(user_obj)
         flash(f'Logged in successfully as {email}', 'success!')
-        return redirect(url_for('protected'))
+        return redirect(url_for('home'))
 
     flash('Error: Invalid email or password.', 'danger')
     return redirect(url_for('login'))

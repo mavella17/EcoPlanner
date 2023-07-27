@@ -47,9 +47,8 @@ def register_user(email, password):
         print("account already exist")
     else:
         user_id = random.randint(1, 1000)
-        insert = "INSERT INTO users (user_id, email, password) VALUES (?, ?, ?)"
-
-        cursor.execute(insert, (user_id, email, password))
+        sq = "INSERT INTO users (user_id, email, password) VALUES (?, ?, ?)"
+        cursor.execute(sq, (user_id, email, password))
         conn.commit()
         print(f"New user with ID {user_id} has been created.")
 
@@ -70,6 +69,7 @@ def display():
 class User(flask_login.UserMixin):
     pass
 
+
 @login_manager.user_loader
 def user_loader(email):
     conn = sqlite3.connect('users.db')
@@ -82,6 +82,7 @@ def user_loader(email):
         user_obj = User()
         user_obj.id = email
         return user_obj
+
 
 @login_manager.request_loader
 def request_loader(request):
@@ -97,11 +98,12 @@ def request_loader(request):
 
     if user_data:
         user = User()
-        user.id = user_data[1]  
+        user.id = user_data[1]
         return user
 
     return None
-    
+
+
 @app.route("/home")
 def home():
     return render_template('home.html', subtitle='Home Page',
@@ -147,8 +149,6 @@ def registration_Data():
     return render_template('register.html')
 
 
-
-
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -163,7 +163,7 @@ def login():
     cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
 
-    if user and password == user[2]: 
+    if user and password == user[2]:
         user_obj = User()
         user_obj.id = email
         flask_login.login_user(user_obj)
@@ -173,17 +173,21 @@ def login():
     flash('Error: Invalid email or password.', 'danger')
     return redirect(url_for('login'))
 
+
 @app.route('/protected')
 @flask_login.login_required
 def protected():
     return 'Logged in as: ' + flask_login.current_user.id
 
+
 @app.route("/check_login_status")
 def check_login_status():
     if flask_login.current_user.is_authenticated:
-        return jsonify({"status": "logged_in", "user": flask_login.current_user.id})
+        return jsonify({"status": "logged_in",
+                        "user": flask_login.current_user.id})
     else:
         return jsonify({"status": "not_logged_in"})
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
@@ -214,7 +218,7 @@ def get_years():
 @app.route('/clearFlights', methods=['GET'])
 def clearFlights():
     if flask_login.current_user.is_authenticated:
-        user_id = flask_login.current_user.id 
+        user_id = flask_login.current_user.id
         query = "DELETE FROM flights WHERE user_id = '" + user_id + "';"
         with footprintEngine.begin() as connection:
             connection.execute(db.text(query))
@@ -226,7 +230,7 @@ def clearFlights():
 @app.route('/clearDrives', methods=['GET'])
 def clearDrives():
     if flask_login.current_user.is_authenticated:
-        user_id = flask_login.current_user.id 
+        user_id = flask_login.current_user.id
         query = "DELETE FROM drives WHERE user_id = '" + user_id + "';"
         with footprintEngine.begin() as connection:
             connection.execute(db.text(query))
@@ -247,11 +251,11 @@ def lookup():
     if req.status_code >= 200 and req.status_code < 300:
         if data['type'] == 'vehicle':
             row = req.json()['data']['attributes']
-            df = pd.DataFrame(row, index=[0]) 
+            df = pd.DataFrame(row, index=[0])
             if flask_login.current_user.is_authenticated:
-                df['user_id'] = flask_login.current_user.id 
-                
-                df.to_sql('drives', con=footprintEngine, if_exists='append', index=True)
+                df['user_id'] = flask_login.current_user.id
+                df.to_sql('drives', con=footprintEngine,
+                          if_exists='append', index=True)
         else:
             row = req.json()['data']['attributes']
             df = pd.DataFrame(row, index=[0])
@@ -259,9 +263,9 @@ def lookup():
             df.drop('legs', axis=1, inplace=True)
             result_df = pd.concat([df, temp], axis=1)
             if flask_login.current_user.is_authenticated:
-                result_df['user_id'] = flask_login.current_user.id  
-                print("","","","REACHED FLIGHT","","")
-                result_df.to_sql('flights', con=footprintEngine, if_exists='append', index=True)
+                result_df['user_id'] = flask_login.current_user.id
+                result_df.to_sql('flights', con=footprintEngine,
+                                 if_exists='append', index=True)
 
     return jsonify(req.json())
 
@@ -274,32 +278,36 @@ def travel():
 @app.route('/poundsCO2')
 def poundsCO2():
     if flask_login.current_user.is_authenticated:
-        user_id = flask_login.current_user.id 
+        user_id = flask_login.current_user.id
         with footprintEngine.connect() as connection:
-            query = "SELECT SUM(carbon_lb) from drives where user_id = '" + user_id +"';"
+            query = "SELECT SUM(carbon_lb) from drives "
+            query += "where user_id = '" + user_id + "';"
             drivelbs = connection.execute(db.text(query)).fetchall()[0][0]
             if not drivelbs:
                 drivelbs = 0
-            query = "SELECT SUM(carbon_lb) from flights where user_id = '" + user_id +"';"
+            query = "SELECT SUM(carbon_lb) from flights "
+            query += "where user_id = '" + user_id + "';"
             flightlbs = connection.execute(db.text(query)).fetchall()[0][0]
             if not flightlbs:
                 flightlbs = 0
-        return jsonify({"flight" : flightlbs, "drive" : drivelbs})
-    return jsonify({"flight" : 0, "drive" : 0})
+        return jsonify({"flight": flightlbs, "drive": drivelbs})
+    return jsonify({"flight": 0, "drive": 0})
 
 
 @app.route('/getFlights')
 def getFlights():
 
     if flask_login.current_user.is_authenticated:
-        user_id = flask_login.current_user.id 
+        user_id = flask_login.current_user.id
         with footprintEngine.connect() as connection:
             query = "SELECT * from flights WHERE user_id = :user_id"
-            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
+            df = pd.read_sql(query, con=footprintEngine,
+                             params={'user_id': user_id})
             results = df.to_dict('records')
             print("FLIGHTS _____", results)
             for record in results:
-                record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+                record['Date'] = record.pop(
+                                 'estimated_at').replace("T", ": ")[:-5]
                 if 'index' in record:
                     del record['index']
                 if 'carbon_g' in record:
@@ -307,22 +315,21 @@ def getFlights():
                 if 'carbon_kg' in record:
                     del record['carbon_kg']
         return jsonify(results)
-    
     return jsonify([])
-    
 
 
 @app.route('/getDrives')
 def getDrives():
     if flask_login.current_user.is_authenticated:
-        user_id = flask_login.current_user.id 
+        user_id = flask_login.current_user.id
         with footprintEngine.connect() as connection:
             query = "SELECT * from drives WHERE user_id = :user_id"
-            df = pd.read_sql(query, con=footprintEngine, params={'user_id': user_id})
+            df = pd.read_sql(query, con=footprintEngine,
+                             params={'user_id': user_id})
         results = df.to_dict('records')
         print("FLIGHTS _____", results)
         for record in results:
-            record['Date'] = record.pop('estimated_at').replace("T",": ")[:-5]
+            record['Date'] = record.pop('estimated_at').replace("T", ": ")[:-5]
             if 'index' in record:
                 del record['index']
             if 'carbon_g' in record:
@@ -342,5 +349,4 @@ def results():
 
 
 if __name__ == '__main__':
-    display()
     app.run(debug=True, host="0.0.0.0")
